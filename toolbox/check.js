@@ -36,6 +36,11 @@ globalThis.fetch = async (url, opts) => {
 };
 
 const { ROOT } = await import('./env.js');
+// The test uses its own settings, whatever is in your .env (which env.js just loaded):
+// test mode off, the normal $330 budget, all three sites, no real keys.
+Object.assign(process.env, { SOURCES: 'vinted,depop,ebay', MONTHLY_BUDGET_USD: '330', PROXY_USD_PER_1000: '0', APIFY_TOKEN: 'fake-token-for-test',
+  DEPOP_ACTOR_ID: 'test~depop', VINTED_ACTOR_ID: 'test~vinted', EBAY_ACTOR_ID: 'test~ebay' });
+for (const k of ['TEST_MODE_EVERYONE_IS_MEMBER', 'STRIPE_CHECKOUT_URL', 'EBAY_CAMPAIGN_ID', 'RESEND_API_KEY', 'ALERT_EMAIL_TO']) delete process.env[k];
 const { toListing } = await import('../1-sources/depop/map.js');
 const { splitCount, enabledSources } = await import('../1-sources/index.js');
 const { problems } = await import('../3-data/validate.js');
