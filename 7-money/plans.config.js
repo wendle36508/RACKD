@@ -7,7 +7,10 @@ export const MEMBER_PLAN = {
 };
 
 export const SUBSCRIPTION = {
-  trialDays: 0,             // Tanner, 4 Nov 2026: no free trial or demo. People pay to start, charged at sign-up
+  // Tanner, 4 Nov 2026: a very short free trial. Card required at sign-up; Stripe charges
+  // $9.99 automatically when the trial ends. Trial users get the normal member limits.
+  // Set the same number of days on the Stripe price (Stripe's built-in trial).
+  trialDays: 3,
   // Where the "Subscribe" button goes: your Stripe payment link (put it in .env when Stripe exists)
   checkoutUrl: () => (process.env.STRIPE_CHECKOUT_URL || '').trim(),
   // TEST MODE, for trying RACKD on your laptop before Stripe exists: everyone counts as a

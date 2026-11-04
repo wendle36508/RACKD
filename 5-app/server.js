@@ -106,7 +106,7 @@ const server = http.createServer(async (req, res) => {
       startOpenJob(uid);   // uses up the refresh right away, so "next" below is after this one
       const member = isMember(getUser(uid));
       return send(res, 200, { scraping: d.ok, reason: d.ok ? null : d.reason, next: nextRefresh(getUser(uid)),
-        join: member ? null : { price: MEMBER_PLAN.priceUsdPerMonth, perDay: MEMBER_PLAN.refreshesPerDay * MEMBER_PLAN.perRefresh, url: SUBSCRIPTION.checkoutUrl() || null } });
+        join: member ? null : { price: MEMBER_PLAN.priceUsdPerMonth, trialDays: SUBSCRIPTION.trialDays, perDay: MEMBER_PLAN.refreshesPerDay * MEMBER_PLAN.perRefresh, url: SUBSCRIPTION.checkoutUrl() || null } });
     }
 
     if (req.method === 'POST' && url.pathname === '/api/more') {

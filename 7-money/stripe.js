@@ -3,8 +3,10 @@
 // or cancels. This file reads it and makes them a member (or not). Members get refreshes
 // (7-money/plans.config.js); everyone else sees "subscribe to start" and costs nothing.
 // Needs STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and STRIPE_CHECKOUT_URL in .env.
-// No free trial (Tanner, 4 Nov 2026): the Stripe subscription charges $9.99 at sign-up, and
-// the person becomes a member the moment Stripe confirms the payment.
+// Free trial (Tanner, 4 Nov 2026): 3 days, using Stripe's built-in trial. A card is required at
+// sign-up; Stripe charges $9.99 automatically when the trial ends. Someone on the trial
+// (Stripe status "trialing") is a member with the normal limits. If the first charge fails
+// or they cancel during the trial, they go back to 'none' and get no more scraping.
 import { getUser, saveUser } from '../3-data/store.js';
 import { activity } from '../toolbox/alerts.js';
 
@@ -20,7 +22,10 @@ export async function handleStripeWebhook(/* rawBody, signatureHeader */) {
   activity('stripe-event', { handled: false, note: 'Stripe not set up yet' });
   // TODO when Stripe is set up:
   // 1. verify the signature with STRIPE_WEBHOOK_SECRET
-  // 2. checkout.session.completed or customer.subscription.created -> setPlan(userId, 'member')
-  // 3. customer.subscription.deleted or invoice.payment_failed (final) -> setPlan(userId, 'none')
+  // 2. checkout.session.completed or customer.subscription.created/updated with status
+  //    'trialing' or 'active' -> setPlan(userId, 'member')  (Checkout: payment_method_collection
+  //    'always' and subscription_data.trial_period_days = SUBSCRIPTION.trialDays, so a card is required)
+  // 3. customer.subscription.deleted, or status 'past_due'/'unpaid'/'canceled' (e.g. the charge at
+  //    the end of the trial failed) -> setPlan(userId, 'none')
   return { status: 501, body: 'Stripe is not set up yet.' };
 }

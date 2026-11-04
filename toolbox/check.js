@@ -70,6 +70,8 @@ ok(scrapeDecision(store.getUser('nina'), t0).ok, 'test mode lets everyone in (fo
 delete process.env.TEST_MODE_EVERYONE_IS_MEMBER;
 const { MEMBER_PLAN } = await import('../7-money/plans.config.js');
 ok(MEMBER_PLAN.priceUsdPerMonth === 9.99 && MEMBER_PLAN.refreshesPerDay === 2 && MEMBER_PLAN.perRefresh === 150, 'the plan is $9.99 a month for 2 refreshes of 150 a day');
+const { SUBSCRIPTION } = await import('../7-money/plans.config.js');
+ok(SUBSCRIPTION.trialDays === 3, 'there is a 3-day free trial (card required; Stripe charges $9.99 when it ends)');
 
 // Floor 2: refresh on open
 setPlan('alice', 'member');

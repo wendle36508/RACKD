@@ -2,7 +2,7 @@
 
 | Piece | File | Status |
 |---|---|---|
-| **Members only** (no free version): one plan, $9.99 a month, 2 refreshes a day x 150. Non-members see "Become a member" and get no scraping | `plans.config.js` | Built. No free trial or demo: pay to start |
+| **Members only** (no free version): one plan, $9.99 a month, 2 refreshes a day x 150. Non-members see "Become a member" and get no scraping | `plans.config.js` | Built. 3-day free trial, card required, $9.99 charged automatically when it ends (`trialDays`) |
 | Test mode: everyone counts as a member, for trying RACKD before Stripe exists. **Turn off before launch** | `.env` (`TEST_MODE_EVERYONE_IS_MEMBER`) | Off by default; health check shows amber if it's on |
 | **Spend guard**: stops all scraping once the month's budget ($330) is used; alerts at 50%, 80% and 100% | `spend-guard.js`, `budget.config.js` | Built |
 | Stripe subscription: paying makes a user a member, cancelling ends it. The "Become a member" button goes to `STRIPE_CHECKOUT_URL` | `stripe.js` | **PLACEHOLDER**. Set the Stripe price to $9.99/month |

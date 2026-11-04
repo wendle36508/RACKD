@@ -241,7 +241,7 @@ function render(){
   }
   if(!queue.length && LIVE && openInfo && openInfo.join){
     const j=openInfo.join;
-    deck.innerHTML=`<div class="empty"><h2>RACKD is for members</h2><p class="muted">${esc('$'+j.price+' a month for up to '+j.perDay+' fresh finds a day, picked for your style. Never the same card twice.')}</p>${j.url?`<a class="linkbtn" href="${esc(j.url)}">Become a member</a>`:'<p class="muted">Sign-up opens soon.</p>'}</div>`; return;
+    deck.innerHTML=`<div class="empty"><h2>RACKD is for members</h2><p class="muted">${esc((j.trialDays?j.trialDays+' days free, then ':'')+'$'+j.price+' a month for up to '+j.perDay+' fresh finds a day, picked for your style. Never the same card twice.'+(j.trialDays?' Card needed to start; cancel any time before the trial ends and you won\'t be charged.':''))}</p>${j.url?`<a class="linkbtn" href="${esc(j.url)}">${j.trialDays?'Start your '+j.trialDays+'-day free trial':'Become a member'}</a>`:'<p class="muted">Sign-up opens soon.</p>'}</div>`; return;
   }
   if(!queue.length && LIVE){
     deck.innerHTML=`<div class="empty"><h2>You're all caught up</h2><p class="muted">${esc(caughtUp())}</p></div>`; return;
