@@ -116,17 +116,17 @@ Never paste the token anywhere else, including chat.
 You only do this once.
 
 1. Install **Git for Windows** from https://git-scm.com/download/win (click Next through the installer; the defaults are fine).
-2. Open **Claude Code** in any folder and say: *"Clone github.com/wendle36508/RACKD into my Documents folder."* Claude Code runs the command for you.
+2. Open **Claude Code** in any folder and say: *"Clone github.com/wendle36508/RACKD into Documents\RACKD-app."* Claude Code runs the command for you. (It's called `RACKD-app` because your laptop already has a different, older `Documents\RACKD` folder.)
    Prefer doing it yourself? Open the **Command Prompt** and type:
    ```
    cd %USERPROFILE%\Documents
-   git clone https://github.com/wendle36508/RACKD.git
+   git clone https://github.com/wendle36508/RACKD.git RACKD-app
    ```
    A GitHub sign-in window pops up the first time. Sign in as wendle36508.
-3. Open the new `Documents\rackd` folder. Double-click **`RACKD.bat`** and pick **1** (set up). Then pick **3** to add example listings, and **2** to start the app. It opens in your browser. If the page is blank, refresh it after a second.
-4. To work on RACKD with Claude Code and gstack, open Claude Code in `Documents\rackd`.
+3. Open the new `Documents\RACKD-app` folder. Double-click **`RACKD.bat`** and pick **1** (set up). Then pick **3** to add example listings, and **2** to start the app. It opens in your browser. If the page is blank, refresh it after a second.
+4. To work on RACKD with Claude Code and gstack, open Claude Code in `Documents\RACKD-app`.
 
-To get the latest changes later, tell Claude Code *"pull the latest rackd"* (or type `git pull` inside the folder).
+To get the latest changes later, tell Claude Code *"pull the latest RACKD-app"* (or type `git pull` inside the folder).
 
 ## When the scraper and proxy arrive
 
