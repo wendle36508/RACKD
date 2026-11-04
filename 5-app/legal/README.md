@@ -10,7 +10,7 @@ There is no sign-up screen yet (today the app gives each visitor a cookie id, se
 2. Show this line next to the sign-up button, with both links:
    > By creating an account and starting your subscription, you agree to RACKD's Terms of Service and confirm you have read our Privacy Policy.
    (Add the minimum age once the lawyer confirms it.)
-3. Send the user to Stripe checkout to start their paid subscription. RACKD is paid-only (Tanner, 4 Nov 2026): no free version. The price and billing period must be shown before they pay.
+3. Send the user to Stripe checkout to start their paid subscription. RACKD is paid-only (Tanner, 4 Nov 2026): one plan, $9.99 a month, 2 refreshes a day of 150 new listings each. Show the price, that it renews monthly, and how to cancel before they pay. (Keep the price out of the privacy policy itself, so a price change never means a policy change.)
 4. Have a separate, **unticked** box for marketing emails: "Send me RACKD news and style tips (optional)."
 5. Save the date and the policy version each user agreed to (for example `user.policyAcceptedAt` and `user.policyVersion`), and log it with `activity('policy-accepted', ...)`.
 6. Put a link to the policy in the app's settings and footer, so users can find it later.
