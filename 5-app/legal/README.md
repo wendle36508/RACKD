@@ -8,10 +8,12 @@ There is no sign-up screen yet (today the app gives each visitor a cookie id, se
 
 1. Link to the privacy policy (and the Terms of Service, once written).
 2. Show this line next to the sign-up button, with both links:
-   > By creating an account, you agree to RACKD's Terms of Service and confirm you have read our Privacy Policy. You must be 13 or older.
-3. Have a separate, **unticked** box for marketing emails: "Send me RACKD news and style tips (optional)."
-4. Save the date and the policy version each user agreed to (for example `user.policyAcceptedAt` and `user.policyVersion`), and log it with `activity('policy-accepted', ...)`.
-5. Put a link to the policy in the app's settings and footer, so users can find it later.
+   > By creating an account and starting your subscription, you agree to RACKD's Terms of Service and confirm you have read our Privacy Policy.
+   (Add the minimum age once the lawyer confirms it.)
+3. Send the user to Stripe checkout to start their paid subscription. RACKD is paid-only (Tanner, 4 Nov 2026): no free version. The price and billing period must be shown before they pay.
+4. Have a separate, **unticked** box for marketing emails: "Send me RACKD news and style tips (optional)."
+5. Save the date and the policy version each user agreed to (for example `user.policyAcceptedAt` and `user.policyVersion`), and log it with `activity('policy-accepted', ...)`.
+6. Put a link to the policy in the app's settings and footer, so users can find it later.
 
 ## Before launch: fill in the placeholders
 
@@ -33,12 +35,12 @@ Search `privacy-policy.md` for `[` to find every one.
 
 These are the points where the right answer depends on RACKD's exact setup. They are also marked `[CONFIRM WITH COUNSEL]` in the policy.
 
-1. **Minimum age:** 13, 16 or 18? (Depop and Vinted allow some under-18s; eBay requires 18. Stripe subscriptions need an adult or parent permission.)
+1. **Minimum age:** 13, 16 or 18? (Depop and Vinted allow some under-18s; eBay requires 18. Since every user pays at sign-up, 18+, or under-18s with a parent's permission, is likely.)
 2. **Affiliate links:** do eBay Partner Network (and later Etsy or Skimlinks) tracking cookies count as "sharing" under California law? If yes, sections 6, 7 and 13 change and the app needs a "Do Not Sell or Share" link.
 3. **Which US state laws apply** at launch, given most have user or revenue thresholds.
 4. **Europe and UK:** is RACKD offered there at launch? If yes, appoint representatives and add a cookie banner for any non-essential cookies.
 5. **Scraped listings:** is the wording in section 2.6 (listing facts only, no seller usernames or ids, removal on request) enough for listing photos that might show a seller?
-6. **Terms of Service:** RACKD also needs Terms of Service (account rules, premium billing and cancellation, affiliate disclosure, "purchases happen on the seller's site"). The FTC also requires a clear affiliate disclosure near "Buy" buttons, not only in the policy.
+6. **Terms of Service:** RACKD also needs Terms of Service (account rules, subscription billing, auto-renewal and cancellation, affiliate disclosure, "purchases happen on the seller's site"). The FTC also requires a clear affiliate disclosure near "Buy" buttons, not only in the policy.
 
 ## Keep the policy true
 
