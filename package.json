@@ -17,6 +17,7 @@
     "summary": "node toolbox/daily-summary.js"
   },
   "dependencies": {
-    "@huggingface/transformers": "3.5.1"
+    "@huggingface/transformers": "3.5.1",
+    "sanitize-html": "^2.18.1"
   }
 }
