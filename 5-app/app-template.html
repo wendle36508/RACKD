@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#14152a">
-<title>RACKD</title>
+<title>__TITLE__</title>
+__HEAD__
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
@@ -94,10 +95,12 @@ main{flex:1;min-height:0;position:relative}
 .pill{font:600 13px var(--body);padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
 .engine{font:700 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
 .foot{font-size:11px;color:var(--muted);text-align:center}
+.hint{font-size:12px;color:var(--muted);margin:-4px 0 0;text-align:center}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+__TOP__
 <div class="app">
   <header>
     <div><div class="logo">RACK<span>D</span></div><div class="engine" id="engine"></div></div>
@@ -107,6 +110,7 @@ main{flex:1;min-height:0;position:relative}
       <button role="tab" id="tab-liked" aria-selected="false">Liked <span class="count" id="likedCount">0</span></button>
     </nav>
   </header>
+  <p class="hint" id="hint"></p>
   <main>
     <section class="view" id="view-swipe">
       <div class="deck" id="deck"></div>
@@ -122,6 +126,7 @@ main{flex:1;min-height:0;position:relative}
   </main>
   <div class="foot">__FOOT__</div>
 </div>
+__BOTTOM__
 <div class="toast" id="toast"></div>
 <script>
 const DATA = __DATA__;
@@ -146,6 +151,7 @@ const labelBase = AI? (()=>{const r={};const withV=items.filter(i=>i.v);['vibe',
 const $ = s=>document.querySelector(s);
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cap = s=>s? s.charAt(0).toUpperCase()+s.slice(1):'';
+const altFor = it=>[it.b&&it.b!=='Unbranded'?it.b:'', it.t].filter(Boolean).join(' ')+(it.s?', size '+it.s:'')+', $'+it.pr+(it.src==='example site'?' (example find)':it.src?' on '+it.src:'');
 const shortCat = c=>(c||'').replace(/^(Women|Men|Kids) /,'').replace(' & Jumpsuits','');
 const KEY='rackd-demo-v1';
 let state = {seen:[], liked:[], passed:[], history:[]};
@@ -221,9 +227,9 @@ function freshFirst(q){return freshIds.size? [...q.filter(id=>freshIds.has(id)),
 const deck=$('#deck');
 function cardHTML(it,P){
   const why=reasons(it,P);
-  const chips=[it.s&&it.s!=='OS'?'Size '+it.s:(it.s==='OS'?'One size':''), it.cd? cap(it.cd.replace('used - ','')) :'', shortCat(it.c), it.st? cap(it.st):''].filter(Boolean);
+  const chips=[it.src==='example site'?'Example find':'', it.s&&it.s!=='OS'?'Size '+it.s:(it.s==='OS'?'One size':''), it.cd? cap(it.cd.replace('used - ','')) :'', shortCat(it.c), it.st? cap(it.st):''].filter(Boolean);
   return `<div class="ph"><b>${esc(it.b)}</b></div>
-  <img src="${esc(it.p)}" alt="${esc(it.t)}" referrerpolicy="no-referrer" draggable="false" onerror="this.remove()">
+  <img src="${esc(it.p)}" alt="${esc(altFor(it))}" referrerpolicy="no-referrer" draggable="false" onerror="this.remove()">
   <div class="shade"></div>
   <div class="pricetag">$${it.pr}${it.op>it.pr&&it.op<=it.pr*5&&![777,999,9999].includes(it.op)?`<s>$${it.op}</s>`:''}</div>
   <div class="stamp like">LIKE</div><div class="stamp nope">PASS</div>
@@ -330,18 +336,19 @@ function likedView(){
   const box=$('#likedBox'); const ids=[...state.liked].reverse();
   if(!ids.length){box.innerHTML=`<div class="panel"><h2>No likes yet</h2><p class="muted">Swipe right or tap the heart and items land here, each with a link to buy it from the seller.</p></div>`;return;}
   const total=ids.reduce((s,id)=>s+items[id].pr,0);
-  box.innerHTML=`<p class="muted" style="margin:0">${ids.length} saved · $${total} total</p><div class="grid">${ids.map(id=>{const it=items[id];return `<div class="item"><div class="thumb"><img src="${esc(it.p)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div>
+  box.innerHTML=`<p class="muted" style="margin:0">${ids.length} saved · $${total} total</p><div class="grid">${ids.map(id=>{const it=items[id];return `<div class="item"><div class="thumb"><img src="${esc(it.p)}" alt="${esc(altFor(it))}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div>
   <div class="body"><div class="t">${esc(it.t)}</div><div class="muted" style="font-size:12px">${esc(it.b)}${it.s?' · '+esc(it.s):''}</div><div class="p">$${it.pr}</div>
   <a href="${esc(it.u)}" target="_blank" rel="noopener">View on ${esc(it.src||'seller site')}</a></div></div>`}).join('')}</div>`;
 }
 function updateCount(){$('#likedCount').textContent=state.liked.length;}
 function reset(){if(LIVE){ api('/api/swipe',{dir:'reset'}).then(()=>location.reload()); return; } state={seen:[],liked:[],passed:[],history:[]};save();rebuild();show('swipe');render();updateCount();}
-function show(v){['swipe','style','liked'].forEach(k=>{$('#view-'+k).hidden=k!==v;$('#tab-'+k).setAttribute('aria-selected',k===v)});
+const HINTS={swipe:'Right to like, left to pass. Grab the good ones before they sell.',style:"RACKD learns what you like from every swipe, so tomorrow's deck is better than today's.",liked:"Your saved finds. Buying happens on the seller's site, with their buyer protection."};
+function show(v){$('#hint').textContent=HINTS[v];['swipe','style','liked'].forEach(k=>{$('#view-'+k).hidden=k!==v;$('#tab-'+k).setAttribute('aria-selected',k===v)});
   if(v==='style')styleView(); if(v==='liked')likedView();}
 ['swipe','style','liked'].forEach(k=>$('#tab-'+k).onclick=()=>show(k));
 let tt; function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600);}
 $('#engine').textContent=AI?'FashionCLIP':'';
-rebuild(); render(); updateCount();
+show('swipe'); rebuild(); render(); updateCount();
 
 // ---------- live mode: refresh on open ----------
 // Tells the server the app was opened (it scrapes new listings for this user's style,

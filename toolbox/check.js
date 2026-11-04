@@ -186,6 +186,16 @@ try {
   ok(!/poshmark/i.test(html), 'no Poshmark data in the app');
 } catch (e) { ok(false, 'app build: ' + (e.stderr || e.message)); }
 
+// Floor 6: the public demo site builds, with its title, headline, sign-up form and pages
+try {
+  execFileSync(process.execPath, [path.join(ROOT, '6-hosting', 'demo', 'build-demo.js')], { env: { ...process.env, RESEND_API_KEY: '' }, stdio: 'pipe' });
+  const dist = path.join(ROOT, '6-hosting', 'demo', 'dist');
+  const html = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
+  ok(/<title>RACKD - [^<]+<\/title>/.test(html) && /<h1>/.test(html) && html.includes('og:image') && html.includes('application/ld+json') && html.includes('class="signup"'), 'the demo site has a real title, headline, preview tags and sign-up form');
+  ok(['about/index.html', 'changelog/index.html', 'robots.txt', 'sitemap.xml', 'og.png'].every(f => fs.existsSync(path.join(dist, f))), 'the demo site has /about, /changelog, robots.txt, sitemap.xml and its preview image');
+  ok(!/__(TITLE|HEAD|TOP|BOTTOM|DATA|FOOT)__/.test(html) && !/poshmark/i.test(html), 'the demo site has no leftover placeholders or Poshmark data');
+} catch (e) { ok(false, 'demo site build: ' + (e.stderr || e.message)); }
+
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log(failed ? `\n${failed} check(s) failed.` : '\nAll checks passed.');
 process.exit(failed ? 1 : 0);
