@@ -18,7 +18,7 @@ If you have any questions, contact us at **[PRIVACY CONTACT EMAIL]**.
 We know privacy policies are long, so here is the plain-English summary. The full policy below is what counts.
 
 - **What RACKD does.** RACKD shows you secondhand fashion listings from resale sites (currently Vinted, Depop and eBay). You swipe right on what you like and left on what you don't, and RACKD learns your style so your feed gets better.
-- **What we collect.** Your account details (like your email), your swipes and the style profile we build from them, basic device and usage information, and your subscription status. RACKD is a paid subscription: you start it at sign-up through our payment processor, Stripe, which handles your card details are handled by our payment processor, We never see or store your full card number.
+- **What we collect.** Your account details (like your email), your swipes and the style profile we build from them, basic device and usage information, and your subscription status. RACKD is a paid subscription that starts with a short free trial: you add a payment card at sign-up through our payment processor, Stripe, which handles your card details. We never see or store your full card number.
 - **What we don't collect.** We don't ask for your contacts, your precise location, your photos or your camera. We don't buy data about you from data brokers.
 - **How we use it.** To run your account, personalize your feed, find new listings that match your style, bill your subscription, keep the Service secure, and improve RACKD.
 - **We don't sell your personal information,** and we don't use it for targeted advertising.
@@ -76,7 +76,7 @@ We collect information in three ways: information you give us, information we co
 | **Swipes and saves** | Which listings you swipe right on (like), swipe left on (pass), save or undo | Generated as you use the app |
 | **Messages to us** | What you write when you email support, report a problem or answer a survey | Optional |
 | **Age confirmation** | Confirmation that you meet the minimum age (see section 16) | Required |
-| **Payment details** | Your card or other payment method, entered on Stripe's secure checkout when you subscribe at sign-up. Stripe collects these directly; we only receive the limited details in section 2.4 | Required, because RACKD is paid-only |
+| **Payment details** | Your card or other payment method, entered on Stripe's secure checkout when you start your free trial at sign-up. Stripe collects these directly; we only receive the limited details in section 2.4 | Required, because RACKD is paid-only |
 
 ### 2.2 Information we collect automatically
 
@@ -100,7 +100,7 @@ We collect information in three ways: information you give us, information we co
 
 | From | What |
 |---|---|
-| **Stripe** (payments) | When you subscribe at sign-up: a Stripe customer ID, your subscription status (active, canceled, past due), the plan you're on, billing dates, the payment method's type, card brand, last four digits and expiry month and year, and your billing country or ZIP code. **We never receive or store your full card number or security code.** Stripe collects that directly |
+| **Stripe** (payments) | When you start your free trial at sign-up: a Stripe customer ID, your subscription status (trialing, active, canceled, past due), your trial end date, the plan you're on, billing dates, the payment method's type, card brand, last four digits and expiry month and year, and your billing country or ZIP code. **We never receive or store your full card number or security code.** Stripe collects that directly |
 | **Sign-in providers** (if offered) | If you sign in with [Apple / Google], the details you allow them to share, usually your name, email and a provider user ID |
 | **Affiliate networks** | Reports of clicks and purchases that came through our links, which usually do not identify you by name (see section 7) |
 
@@ -126,7 +126,7 @@ We use personal information only for the purposes below.
 | **Find new listings for you** | When you open the app (at most once an hour and up to the number of daily refreshes your plan allows), we send search terms based on your style to our data-collection provider, which finds matching listings on resale sites | Search terms, plan and refresh limits |
 | **Check listings are still for sale** | Re-check listings before you see them so we don't show you sold items | Listing information (not personal information about you) |
 | **Show you listings found for other users** | If another user's search found a listing that strongly matches **your** style, it may appear in your feed too. Other users never see who you are or what you swiped | Style profile |
-| **Process your subscription** | Start your subscription at sign-up, renew, change and cancel it, and handle refunds and billing questions. RACKD is paid-only, so an active subscription is needed to use the Service | Stripe information, account information |
+| **Process your subscription** | Start your free trial at sign-up, charge your card automatically when the trial ends unless you cancel first, renew, change and cancel your subscription, send trial and renewal reminders, and handle refunds and billing questions. RACKD is paid-only, so an active subscription is needed to use the Service | Stripe information, account information |
 | **Communicate with you** | Account and security emails, receipts, changes to this policy or our terms, replies to your questions, and (only if you agree) product news | Email address, messages to us |
 | **Keep RACKD safe and working** | Detect and prevent fraud, abuse, spam, scraping of our Service and security incidents; fix bugs; monitor uptime | Device, connection and log information, usage history |
 | **Control our costs** | Keep a record of every refresh and what it cost, so that our spending stays within budget and nothing happens without a record | Usage history (refresh records include your user ID) |
@@ -328,7 +328,7 @@ California Civil Code section 1798.83 lets California residents ask for informat
 
 ### 13.5 Financial incentives
 
-RACKD is a paid subscription service. We do not offer any discount, free tier or other benefit in exchange for your personal information, so we do not offer financial incentives based on personal information. [CONFIRM WITH COUNSEL if any referral or reward program is added.]
+RACKD is a paid subscription service. Our short free trial is offered to every new subscriber and is not offered in exchange for your personal information. We do not offer any discount or other benefit in exchange for your personal information, so we do not offer financial incentives based on personal information. [CONFIRM WITH COUNSEL if any referral or reward program is added.]
 
 ## 14. Additional information for residents of other US states
 

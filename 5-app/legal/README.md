@@ -10,7 +10,10 @@ There is no sign-up screen yet (today the app gives each visitor a cookie id, se
 2. Show this line next to the sign-up button, with both links:
    > By creating an account and starting your subscription, you agree to RACKD's Terms of Service and confirm you have read our Privacy Policy.
    (Add the minimum age once the lawyer confirms it.)
-3. Send the user to Stripe checkout to start their paid subscription. RACKD is paid-only (Tanner, 4 Nov 2026): one plan, $9.99 a month, 2 refreshes a day of 150 new listings each. Show the price, that it renews monthly, and how to cancel before they pay. (Keep the price out of the privacy policy itself, so a price change never means a policy change.)
+3. Send the user to Stripe checkout to start a **3-day free trial** (card required up front). RACKD is paid-only (Tanner, 4 Nov 2026): one plan, $9.99 a month, 2 refreshes a day of 150 new listings each. When the trial ends, Stripe charges $9.99 automatically and then every month until they cancel. Before they enter their card, show clearly, next to the button and not hidden in a link:
+   > Free for 3 days, then $9.99 a month. Your card will be charged automatically on [trial end date] unless you cancel before then. Your subscription renews every month until you cancel. Cancel anytime in Settings.
+
+   US auto-renewal laws (such as California's and the FTC's rules on free trials) also expect: a checkbox or clear action where they agree to the auto-renewal terms, a confirmation email with the trial end date, price and how to cancel, a reminder email before the first charge (Stripe can send this), and cancelling online as easily as signing up. Ask the lawyer to confirm. (Keep the price out of the privacy policy itself, so a price change never means a policy change.)
 4. Have a separate, **unticked** box for marketing emails: "Send me RACKD news and style tips (optional)."
 5. Save the date and the policy version each user agreed to (for example `user.policyAcceptedAt` and `user.policyVersion`), and log it with `activity('policy-accepted', ...)`.
 6. Put a link to the policy in the app's settings and footer, so users can find it later.
@@ -40,7 +43,7 @@ These are the points where the right answer depends on RACKD's exact setup. They
 3. **Which US state laws apply** at launch, given most have user or revenue thresholds.
 4. **Europe and UK:** is RACKD offered there at launch? If yes, appoint representatives and add a cookie banner for any non-essential cookies.
 5. **Scraped listings:** is the wording in section 2.6 (listing facts only, no seller usernames or ids, removal on request) enough for listing photos that might show a seller?
-6. **Terms of Service:** RACKD also needs Terms of Service (account rules, subscription billing, auto-renewal and cancellation, affiliate disclosure, "purchases happen on the seller's site"). The FTC also requires a clear affiliate disclosure near "Buy" buttons, not only in the policy.
+6. **Terms of Service:** RACKD also needs Terms of Service (account rules, the free trial, subscription billing, auto-renewal and cancellation, affiliate disclosure, "purchases happen on the seller's site"). The FTC also requires a clear affiliate disclosure near "Buy" buttons, not only in the policy.
 
 ## Keep the policy true
 
