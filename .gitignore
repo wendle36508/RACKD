@@ -12,3 +12,4 @@ logs/
 # Your real listings and the built app (they live on your laptop / database, not in GitHub)
 3-data/local/
 5-app/dist/
+6-hosting/demo/dist/
