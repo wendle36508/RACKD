@@ -1,11 +1,13 @@
 # Floor 7: Money
 
-| Piece | Status |
-|---|---|
-| `affiliate.js` | **PLACEHOLDER.** Every Buy link in the app goes through here. Add a site's affiliate rule and all links switch on at the next build |
-| eBay Ambassador links | Joined, not live in the app yet |
-| Etsy affiliate | Not set up |
-| Subscription | Decided 3 Nov 2026: free = 50 new swipes an hour, $5/month = 400 an hour. Not built |
-| In-app browser | Not built (buyers check out on the seller's site for now) |
+| Piece | File | Status |
+|---|---|---|
+| Plans: free (2 refreshes a day x 50) and premium (2 x 150) | `plans.config.js` | Built. Premium price not decided |
+| **Spend guard**: stops all scraping once the month's budget ($330) is used; alerts at 50%, 80% and 100% | `spend-guard.js`, `budget.config.js` | Built |
+| Stripe subscription: flips a user to premium, which raises their refreshes automatically | `stripe.js` | **PLACEHOLDER** |
+| Affiliate links: every Buy button goes through here | `affiliate.js` | **PLACEHOLDER**. eBay Ambassador joined, Etsy not set up |
+| In-app browser | | Not built (buyers check out on the seller's site) |
 
-**Remember (FTC rule):** once affiliate links are live, the app must clearly say RACKD may earn a commission.
+**Also set a hard cap in Apify itself:** Apify console → Settings → Usage & billing → set a monthly usage limit (for example $330). The spend guard is RACKD's own brake; Apify's limit is a second brake that works even if something in RACKD goes wrong.
+
+**FTC rule:** once affiliate links are live, the app must clearly say RACKD may earn a commission.

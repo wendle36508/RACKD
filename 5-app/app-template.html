@@ -126,6 +126,10 @@ main{flex:1;min-height:0;position:relative}
 <script>
 const DATA = __DATA__;
 const VEC = __VEC__;
+// LIVE is filled in by the server (5-app/server.js). In the offline file it is null.
+const LIVE = __LIVE__;
+let liveLoading = false;
+const api=(u,b)=>fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(r=>r.json()).catch(()=>null);
 const items = DATA.map((d,i)=>({...d,id:i}));
 // ---------- FashionCLIP fingerprints ----------
 // Each photo was turned into 512 numbers by FashionCLIP. Similar-looking items have similar numbers.
@@ -144,7 +148,8 @@ const shortCat = c=>(c||'').replace(/^(Women|Men|Kids) /,'').replace(' & Jumpsui
 const KEY='rackd-demo-v1';
 let state = {seen:[], liked:[], passed:[], history:[]};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&Array.isArray(s.seen)) state=s;}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+if(LIVE) state={seen:[...LIVE.liked,...LIVE.passed],liked:[...LIVE.liked],passed:[...LIVE.passed],history:[]};
+const save=()=>{if(LIVE)return;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
 
 // ---------- taste model ----------
 // Each like adds weight to that brand, style and category; a pass takes a little away.
@@ -194,7 +199,7 @@ function reasons(it,P){
 }
 // stable shuffle so a fresh deck mixes brands
 function seeded(n){let a=1;return ()=>((a=(a*16807)%2147483647)/2147483647);}
-const rnd=seeded(); const baseOrder=items.map(i=>i.id).sort(()=>rnd()-.5);
+const rnd=seeded(); const baseOrder=LIVE? items.map(i=>i.id) : items.map(i=>i.id).sort(()=>rnd()-.5); // the server already sends best matches first
 let queue=[];
 function rebuild(){
   const seen=new Set(state.seen);
@@ -227,6 +232,9 @@ function cardHTML(it,P){
 }
 function render(){
   deck.innerHTML='';
+  if(!queue.length && LIVE && liveLoading){
+    deck.innerHTML=`<div class="empty"><h2>Finding fresh pieces for you</h2><p class="muted">RACKD is pulling new listings that fit your style. They'll appear here in a minute.</p></div>`; return;
+  }
   if(!queue.length){
     deck.innerHTML=`<div class="empty"><h2>You've seen the whole rack</h2><p class="muted">All ${items.length} listings swiped. Check your style and liked items, or start over.</p><button class="linkbtn" id="resetBtn2">Start over</button></div>`;
     $('#resetBtn2').onclick=reset; return;
@@ -265,6 +273,7 @@ function fling(el,dir){
 }
 function decide(id,dir){
   state.seen.push(id); state.history.push({id,dir});
+  if(LIVE) api('/api/swipe',{id:items[id].k,dir});
   (dir==='like'?state.liked:state.passed).push(id);
   save(); rebuild(); render(); updateCount();
   const n=state.liked.length;
@@ -275,6 +284,7 @@ $('#likeBtn').onclick=()=>{const c=topCard(); if(c) fling(c,'like')};
 $('#nopeBtn').onclick=()=>{const c=topCard(); if(c) fling(c,'pass')};
 $('#infoBtn').onclick=()=>{const c=topCard(); if(c) window.open(items[+c.dataset.id].u,'_blank','noopener')};
 $('#undoBtn').onclick=()=>{const h=state.history.pop(); if(!h){toast('Nothing to undo');return;}
+  if(LIVE) api('/api/swipe',{id:items[h.id].k,dir:'undo'});
   state.seen=state.seen.filter(x=>x!==h.id); state.liked=state.liked.filter(x=>x!==h.id); state.passed=state.passed.filter(x=>x!==h.id);
   save(); rebuild(); queue=[h.id,...queue.filter(x=>x!==h.id)]; render(); updateCount();};
 document.addEventListener('keydown',e=>{if(!$('#view-swipe').hidden){if(e.key==='ArrowRight')$('#likeBtn').click(); if(e.key==='ArrowLeft')$('#nopeBtn').click();}});
@@ -313,13 +323,32 @@ function likedView(){
   <a href="${esc(it.u)}" target="_blank" rel="noopener">View on ${esc(it.src||'seller site')}</a></div></div>`}).join('')}</div>`;
 }
 function updateCount(){$('#likedCount').textContent=state.liked.length;}
-function reset(){state={seen:[],liked:[],passed:[],history:[]};save();rebuild();show('swipe');render();updateCount();}
+function reset(){if(LIVE) api('/api/swipe',{dir:'reset'}); state={seen:[],liked:[],passed:[],history:[]};save();rebuild();show('swipe');render();updateCount();}
 function show(v){['swipe','style','liked'].forEach(k=>{$('#view-'+k).hidden=k!==v;$('#tab-'+k).setAttribute('aria-selected',k===v)});
   if(v==='style')styleView(); if(v==='liked')likedView();}
 ['swipe','style','liked'].forEach(k=>$('#tab-'+k).onclick=()=>show(k));
 let tt; function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600);}
 $('#engine').textContent=AI?'FashionCLIP':'';
 rebuild(); render(); updateCount();
+
+// ---------- live mode: refresh on open ----------
+// Tells the server the app was opened (it scrapes new listings for this user's style,
+// at most once an hour), then checks every few seconds for new cards while it works.
+function addCards(cards){
+  const known=new Set(items.map(i=>i.k)); let n=0;
+  cards.forEach(d=>{ if(known.has(d.k)) return; const id=items.length; items.push({...d,id}); baseOrder.push(id); n++; });
+  if(!n) return;
+  const wasEmpty=!queue.length; rebuild(); if(wasEmpty) render();
+  toast(`${n} new ${n===1?'find':'finds'} added to your rack`);
+}
+async function poll(){
+  const r=await api('/api/more',{known:items.map(i=>i.k)});
+  if(r){ addCards(r.cards||[]); liveLoading=!!r.running; }
+  if(liveLoading) setTimeout(poll,4000); else if(!queue.length) render();
+}
+if(LIVE){
+  api('/api/open').then(r=>{ liveLoading=true; if(!queue.length) render(); setTimeout(poll,3000); });
+}
 </script>
 </body>
 </html>

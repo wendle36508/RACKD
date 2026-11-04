@@ -8,7 +8,7 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const envFile = path.join(ROOT, '.env');
 if (fs.existsSync(envFile)) process.loadEnvFile(envFile);
 
-export const LOG_DIR = path.join(ROOT, 'logs');
+export const LOG_DIR = process.env.RACKD_LOG_DIR || path.join(ROOT, 'logs');
 
 export function need(name) {
   const v = (process.env[name] || '').trim();

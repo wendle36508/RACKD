@@ -4,5 +4,5 @@
 
 When it's time:
 1. Move storage to the cloud database (floor 3, `supabase/schema.sql`).
-2. Move the two freshness jobs (floor 2) to a cloud scheduler so they run without your laptop.
-3. Connect this repo to Vercel and publish `5-app/`.
+2. Run `5-app/server.js` online (Vercel or a small Node host), with the same `.env` values stored as secrets there.
+3. Point the Stripe webhook (floor 7) at the online address.

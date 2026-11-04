@@ -1,14 +1,14 @@
 # Floor 2: Freshness
 
-Keeps the deck fresh and stops people falling for items that already sold.
+Keeps every deck fresh, per user, and makes sure nobody falls for an item that already sold.
 
-| Job | When | File |
-|---|---|---|
-| Add new listings | Every hour, 20 new | `fetch-new.js` |
-| Sold-item removal | Every day at 4am, re-checks 500 | `recheck-sold.js` |
+| File | What it does |
+|---|---|
+| `on-open.js` | **Refresh on open.** When a user opens the app, scrape new listings picked for their style. At most once an hour, 2 times a day (free 50 each, premium 150 each). Skipped if the monthly budget is used up |
+| `check-before-show.js` | **Sold check, just before showing.** Any card not confirmed for sale in the last 24 hours is re-checked before it appears. Sold ones are hidden for good; ones that vanish twice in a row are taken down |
+| `cleanup.js` | Deletes sold listings older than 30 days. Free (no scraping): `npm run cleanup` |
+| `freshness.config.js` | The numbers: 60-minute gap, 24-hour re-check, how many cards to check per open |
 
-All the numbers are in **`schedule.config.js`**, so you can change them in one place.
+How many listings each plan gets is in `7-money/plans.config.js`.
 
-**How sold-item removal works:** the daily job re-checks the 500 listings that were checked longest ago, so every listing gets looked at in turn. Sold ones are hidden from the app straight away. If a listing can't be found two checks in a row, it's taken down too. Sold items stay in storage (hidden) for 30 days so the style AI still remembers what people liked, then they're deleted.
-
-**Turning the schedule on:** double-click `RACKD.bat` and pick 8. That uses Windows Task Scheduler, so it runs while your laptop is on. When RACKD moves online (floor 6), the same two jobs move to a cloud scheduler instead.
+Nothing here runs on a timer. Everything happens because a user opened the app, so there are no background jobs to forget about. Every refresh, skipped refresh and sold check is written to the activity log (see the README's "Safety rails").

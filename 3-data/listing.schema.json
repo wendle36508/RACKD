@@ -7,7 +7,7 @@
   "required": ["id", "source", "sourceId", "url", "title", "price", "currency", "photoUrl", "status", "firstSeenAt", "lastCheckedAt"],
   "properties": {
     "id":                { "type": "string", "description": "RACKD's own id: source + ':' + sourceId, e.g. depop:vintage-levis-501-abc123" },
-    "source":            { "type": "string", "enum": ["depop", "etsy", "ebay", "vinted", "grailed", "manual"], "description": "Which site the item is listed on" },
+    "source":            { "type": "string", "enum": ["depop", "vinted", "etsy", "ebay", "grailed", "manual"], "description": "Which site the item is listed on" },
     "sourceId":          { "type": "string", "description": "The site's own id or slug for the item" },
     "url":               { "type": "string", "format": "uri", "description": "The listing page, where the buyer actually buys" },
     "affiliateUrl":      { "type": ["string", "null"], "format": "uri", "description": "Floor 7: tracked link that earns RACKD a commission. Null until an affiliate program is live for this source" },
@@ -26,8 +26,9 @@
     "sellerReviewCount": { "type": ["integer", "null"] },
     "status":            { "type": "string", "enum": ["active", "sold", "removed"], "description": "Only active items are shown in the app" },
     "missedChecks":      { "type": "integer", "default": 0, "description": "How many re-checks in a row could not find the item. At 2, it is marked removed" },
+    "scrapedFor":        { "type": ["string", "null"], "description": "The user whose style search found this item. Other users only see it if it is a strong match for them" },
     "firstSeenAt":       { "type": "string", "format": "date-time" },
-    "lastCheckedAt":     { "type": "string", "format": "date-time", "description": "Last time the daily re-check confirmed it is still for sale" },
+    "lastCheckedAt":     { "type": "string", "format": "date-time", "description": "Last time RACKD confirmed it is still for sale. Checked again just before showing if older than the stale limit" },
     "soldAt":            { "type": ["string", "null"], "format": "date-time" }
   },
   "additionalProperties": false

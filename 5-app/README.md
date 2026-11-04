@@ -1,10 +1,12 @@
 # Floor 5: App
 
-The swipe app. Tabs: **Swipe**, **Your style**, **Liked** (each liked item links to buy it on the seller's site).
-
 | File | What it is |
 |---|---|
-| `app-template.html` | The app design and swipe logic. Works with listings from any site |
-| `build-app.js` | Fills the template with active listings, fingerprints and buy links, and writes `dist/rackd.html` |
+| `server.js` | The app server: `npm start` or RACKD.bat option 2, then open http://localhost:3000. Gives each visitor an id (a cookie), shows their deck straight away, runs the sold check and refresh in the background, and slides new finds in as they arrive |
+| `app-template.html` | The app design and swipe logic. Tabs: Swipe, Your style, Liked (each liked item links to buy it on the seller's site) |
+| `app-data.js` | Turns stored listings into app cards, with buy links (floor 7) and fingerprints (floor 4) |
+| `build-app.js` | Optional: an offline copy of the app with no server (`npm run demo` → `dist/rackd.html`) |
 
-Try it: double-click `RACKD.bat` and pick 2 (example listings) or 6 (your real listings). `dist/` is rebuilt each time and isn't uploaded to GitHub.
+Useful pages while the server runs:
+- http://localhost:3000/api/health: a light for every floor
+- http://localhost:3000/api/status: your plan, today's refreshes, this month's spend

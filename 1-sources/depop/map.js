@@ -45,6 +45,7 @@ export function toListing(raw, now = new Date().toISOString()) {
     sellerReviewCount: raw.sellerReviewsTotal != null ? parseInt(raw.sellerReviewsTotal, 10) : null,
     status: raw.sold === true || /sold/i.test(String(raw.status || '')) ? 'sold' : 'active',
     missedChecks: 0,
+    scrapedFor: null,
     firstSeenAt: now,
     lastCheckedAt: now,
     soldAt: null,

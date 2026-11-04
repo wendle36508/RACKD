@@ -1,9 +1,12 @@
 # Floor 4: Algorithm
 
-**FashionCLIP style AI** (`fashionclip/fingerprint.js`). FashionCLIP is a free AI trained on fashion photos. It looks at each listing photo once and saves a "style fingerprint" (512 numbers). Items that look alike get similar fingerprints. Only new listings are processed, so hourly runs are quick.
+| File | What it does |
+|---|---|
+| `taste.js` | Reads a user's style from their likes and passes (brands, styles, categories, size, price range, and how their likes look). Turns that into **their own scraper searches**, and scores how well any listing fits them, 0 to 1 |
+| `deck.js` | Picks a user's next cards: their own finds first, best match first. **Light sharing:** other people's finds only if they score 0.6 or higher for this user, and at most 20% of the deck |
+| `taste.config.js` | Starter searches for brand-new users (until 3 likes) and the sharing rules |
+| `fashionclip/fingerprint.js` | FashionCLIP looks at each new listing photo once and saves a "style fingerprint" (512 numbers). Items that look alike get similar fingerprints, so matching is based on looks, not only words. The server runs it after each refresh once it's installed (RACKD.bat option 1: about 200 MB add-on + 600 MB model, first time only) |
 
-The first run downloads the AI add-on (about 200 MB) and FashionCLIP itself (about 600 MB). After that it runs offline from `fashionclip/model-cache/`.
-
-**How taste is learned (inside the app, floor 5):** every like pulls your taste toward that look, every pass pushes it away a little, and the deck is re-sorted by how close each item is to your taste. The "Your style" tab shows which style words (boho, streetwear, y2k...) and colors fit your likes. Brand, category and price range also count.
+Inside the app, every like pulls the deck toward that look and every pass pushes it away. The "Your style" tab shows the style words and colors that fit your likes.
 
 Model: `patrickjohncyh/fashion-clip` on Hugging Face. Check its license before using it in a paid product.
