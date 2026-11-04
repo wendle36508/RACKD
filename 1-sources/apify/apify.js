@@ -17,7 +17,11 @@ async function runActor(actorId, input, timeoutSecs) {
     body: JSON.stringify(input),
     signal: AbortSignal.timeout((timeoutSecs + 30) * 1000),
   });
-  if (!res.ok) throw new Error(`Apify said ${res.status} for ${actorId}: ${(await res.text()).slice(0, 400)}`);
+  if (!res.ok) {
+    const e = new Error(`Apify said ${res.status} for ${actorId}: ${(await res.text()).slice(0, 400)}`);
+    e.status = res.status;
+    throw e;
+  }
   return res.json();
 }
 
@@ -28,7 +32,15 @@ async function runActor(actorId, input, timeoutSecs) {
 export async function runPaid(source, actorId, input, maxItems, what, { timeoutSecs = 240 } = {}) {
   const price = usdPerListing(source);
   allow(maxItems * price, what);
-  const items = await runActor(actorId, input, timeoutSecs);
+  let items;
+  try { items = await runActor(actorId, input, timeoutSecs); }
+  catch (e) {
+    // If Apify refused the run outright (a 4xx, like a wrong token or actor id), it cost nothing.
+    // Otherwise (timed out, Apify error, connection dropped) the run may have kept going on
+    // Apify and been charged, so count it at the most it could cost. The guard never under-counts.
+    if (!(e.status >= 400 && e.status < 500)) record(maxItems * price, `${what} (failed: counted at the most it could cost)`, 0);
+    throw e;
+  }
   const list = Array.isArray(items) ? items : [];
   record(list.length * price, what, list.length);
   return list;

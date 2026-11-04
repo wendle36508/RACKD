@@ -239,6 +239,10 @@ function render(){
   if(!queue.length && LIVE && liveLoading && liveRefreshing){
     deck.innerHTML=`<div class="empty"><h2>Finding fresh pieces for you</h2><p class="muted">RACKD is pulling new listings that fit your style. They'll appear here in a minute.</p></div>`; return;
   }
+  if(!queue.length && LIVE && openInfo && openInfo.join){
+    const j=openInfo.join;
+    deck.innerHTML=`<div class="empty"><h2>RACKD is for members</h2><p class="muted">${esc('$'+j.price+' a month for up to '+j.perDay+' fresh finds a day, picked for your style. Never the same card twice.')}</p>${j.url?`<a class="linkbtn" href="${esc(j.url)}">Become a member</a>`:'<p class="muted">Sign-up opens soon.</p>'}</div>`; return;
+  }
   if(!queue.length && LIVE){
     deck.innerHTML=`<div class="empty"><h2>You're all caught up</h2><p class="muted">${esc(caughtUp())}</p></div>`; return;
   }

@@ -69,12 +69,12 @@ export function upsertFound(found, userId, nowIso = new Date().toISOString()) {
 }
 
 // ---------- users ----------
-// A user: { id, plan: 'free'|'premium', createdAt, lastScrapeAt, day: { date, count, refreshes },
+// A user: { id, plan: 'member'|'none', createdAt, lastScrapeAt, day: { date, count, refreshes },
 //           liked: [ids], passed: [ids], shown: [ids of every card they've had on screen],
 //           lastRefresh: { at, ids }, searchCursor }
 export function getUser(id) {
   const all = readJson(file('users.json'), {});
-  return all[id] || { id, plan: 'free', createdAt: new Date().toISOString(), lastScrapeAt: null, day: { date: null, count: 0, refreshes: 0 },
+  return all[id] || { id, plan: 'none', createdAt: new Date().toISOString(), lastScrapeAt: null, day: { date: null, count: 0, refreshes: 0 },
     liked: [], passed: [], shown: [], lastRefresh: { at: null, ids: [] }, searchCursor: 0 };
 }
 

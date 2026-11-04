@@ -10,6 +10,7 @@ import { ROOT, LOG_DIR } from './env.js';
 import { readActivity, activeListings, loadFingerprints, LOCAL_DIR } from '../3-data/store.js';
 import { spentThisMonth } from '../7-money/spend-guard.js';
 import { BUDGET } from '../7-money/budget.config.js';
+import { SUBSCRIPTION } from '../7-money/plans.config.js';
 
 const light = (color, note) => ({ light: color, note });
 const hoursAgo = iso => (Date.now() - new Date(iso).getTime()) / 3600e3;
@@ -64,7 +65,11 @@ export function health({ serverRunning = false } = {}) {
 
   // Floor 7: money
   const spent = spentThisMonth(), pct = spent / BUDGET.monthlyUsd;
-  out['7-money'] = light(pct >= 1 ? 'red' : pct >= 0.8 ? 'amber' : 'green', `Spend guard on: $${spent.toFixed(2)} of $${BUDGET.monthlyUsd} this month. Stripe and affiliate links not set up yet`);
+  const testMode = SUBSCRIPTION.testModeEveryoneIsMember();
+  out['7-money'] = light(pct >= 1 ? 'red' : (pct >= 0.8 || testMode) ? 'amber' : 'green',
+    `Spend guard on: $${spent.toFixed(2)} of $${BUDGET.monthlyUsd} this month.` +
+    (testMode ? ' TEST MODE is on: everyone counts as a member without paying. Turn it off before launch.' : '') +
+    (SUBSCRIPTION.checkoutUrl() ? '' : ' Stripe sign-up not set up yet ($9.99/month).'));
 
   // Toolbox: alerts
   const email = (process.env.RESEND_API_KEY || '').trim() && (process.env.ALERT_EMAIL_TO || '').trim();

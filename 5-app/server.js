@@ -18,7 +18,7 @@ import { loadListings, loadFingerprints, getUser, saveUser, markShown } from '..
 import { deckFor } from '../4-algorithm/deck.js';
 import { refreshForUser, scrapeDecision, isRunning, nextRefresh } from '../2-freshness/on-open.js';
 import { checkStale, isFresh } from '../2-freshness/check-before-show.js';
-import { planFor } from '../7-money/plans.config.js';
+import { planFor, isMember, SUBSCRIPTION, MEMBER_PLAN } from '../7-money/plans.config.js';
 import { spentThisMonth } from '../7-money/spend-guard.js';
 import { BUDGET } from '../7-money/budget.config.js';
 import { handleStripeWebhook } from '../7-money/stripe.js';
@@ -52,7 +52,8 @@ function page(uid) {
   const user = getUser(uid);
   const all = loadListings(), fp = loadFingerprints();
   const byId = new Map(all.map(l => [l.id, l]));
-  const { items } = deckFor(user, all, fp, { limit: 150, freshOnly: l => isFresh(l) });
+  // Members-only: someone who hasn't subscribed gets an empty deck and a "subscribe" screen.
+  const { items } = isMember(user) ? deckFor(user, all, fp, { limit: 150, freshOnly: l => isFresh(l) }) : { items: [] };
   const liked = user.liked.map(id => byId.get(id)).filter(Boolean);
   const passed = user.passed.map(id => byId.get(id)).filter(Boolean);
   const listings = [...items, ...liked, ...passed];
@@ -75,7 +76,8 @@ function startOpenJob(uid) {
     const { items } = deckFor(user, loadListings(), loadFingerprints(), { limit: 60 });
     // Both at once: the sold check on their next cards, and the new scrape for their style
     // (if they have a refresh). Starting the refresh straight away gets new finds in sooner.
-    const [, r] = await Promise.all([checkStale(items), refreshForUser(uid)]);
+    // Non-members cost nothing: no sold check and no scrape (refreshForUser says no and logs why).
+    const [, r] = await Promise.all([isMember(user) ? checkStale(items) : 0, refreshForUser(uid)]);
     if (r.added) runStyleAi();
     return r;
   })().catch(e => { log(`open job for ${uid}: ${e.message}`); return { error: e.message }; })
@@ -102,7 +104,9 @@ const server = http.createServer(async (req, res) => {
       const d = scrapeDecision(getUser(uid));
       activity('app-open', { user: uid, willRefresh: d.ok, reason: d.ok ? null : d.reason });
       startOpenJob(uid);   // uses up the refresh right away, so "next" below is after this one
-      return send(res, 200, { scraping: d.ok, reason: d.ok ? null : d.reason, next: nextRefresh(getUser(uid)) });
+      const member = isMember(getUser(uid));
+      return send(res, 200, { scraping: d.ok, reason: d.ok ? null : d.reason, next: nextRefresh(getUser(uid)),
+        join: member ? null : { price: MEMBER_PLAN.priceUsdPerMonth, perDay: MEMBER_PLAN.refreshesPerDay * MEMBER_PLAN.perRefresh, url: SUBSCRIPTION.checkoutUrl() || null } });
     }
 
     if (req.method === 'POST' && url.pathname === '/api/more') {
@@ -137,7 +141,7 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'GET' && url.pathname === '/api/status') {
       const u = getUser(uid); const d = scrapeDecision(u);
-      return send(res, 200, { user: uid, plan: u.plan || 'free', refreshesPerDay: planFor(u).refreshesPerDay, perRefresh: planFor(u).perRefresh, usedToday: d.usedToday,
+      return send(res, 200, { user: uid, member: isMember(u), refreshesPerDay: planFor(u)?.refreshesPerDay ?? 0, perRefresh: planFor(u)?.perRefresh ?? 0, usedToday: d.usedToday,
         nextScrape: d.ok ? 'on next open' : d.reason, spentThisMonthUsd: spentThisMonth(), budgetUsd: BUDGET.monthlyUsd });
     }
     send(res, 404, { error: 'not found' });

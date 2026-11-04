@@ -1,7 +1,8 @@
 // Floor 2: "refresh on open".
 // Each time a user opens the app, RACKD scrapes new listings picked for THEIR style, unless:
 //   - it already scraped for them less than an hour ago (cooldown), or
-//   - they've had all of today's refreshes (2 a day: free 50 each, premium 150 each), or
+//   - they aren't a member (RACKD is members-only: no subscription, no scraping), or
+//   - they've had all of today's refreshes (2 a day, 150 listings each), or
 //   - this month's Apify budget is used up (spend guard).
 // While the scrape runs (it takes a minute or two), the app shows their stored matches.
 import { logger } from '../toolbox/env.js';
@@ -22,6 +23,7 @@ export function scrapeDecision(user, now = new Date()) {
   const plan = planFor(user);
   const isToday = user.day?.date === today(now);
   const used = isToday ? user.day.count : 0;
+  if (!plan) return { ok: false, reason: 'not-member', usedToday: used };
   const refreshes = isToday ? (user.day.refreshes || 0) : 0;
   if (user.lastScrapeAt) {
     const next = new Date(new Date(user.lastScrapeAt).getTime() + FRESHNESS.cooldownMinutes * 60e3);
@@ -54,7 +56,7 @@ export async function refreshForUser(userId, now = new Date()) {
 
   let scraped = 0, added = 0, repeats = 0, reason = 'done';
   const errors = [];
-  activity('refresh-start', { user: userId, plan: user.plan || 'free', asked: d.count, refreshToday: user.day.refreshes });
+  activity('refresh-start', { user: userId, plan: user.plan || 'none', asked: d.count, refreshToday: user.day.refreshes });
   try {
     const listings = loadListings();
     const P = profileOf(user, new Map(listings.map(l => [l.id, l])), loadFingerprints());
@@ -100,6 +102,7 @@ export const isRunning = userId => running.has(userId);
 export function nextRefresh(user, now = new Date()) {
   const d = scrapeDecision(user, now);
   if (d.ok) return { now: true };
+  if (d.reason === 'not-member') return { subscribe: true };
   if (d.reason === 'daily-limit') return { tomorrow: true };
   const refreshesToday = user.day?.date === today(now) ? user.day.refreshes || 0 : 0;
   if (refreshesToday >= planFor(user).refreshesPerDay) return { tomorrow: true };

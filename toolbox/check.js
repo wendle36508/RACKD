@@ -1,6 +1,6 @@
 // Self-test that needs no internet and no Apify account (Apify is faked).
 // Checks the rules Tanner set: refresh on open at most once an hour, 2 refreshes a day
-// (free 50 each, premium 150 each), the budget guard, light sharing, sold checks, and
+// (150 each), members-only, the budget guard, light sharing, sold checks, and
 // that the app builds. Run with: npm run check
 import fs from 'node:fs';
 import os from 'node:os';
@@ -60,20 +60,31 @@ ok(l && !('sellerUsername' in l) && problems(l).length === 0, 'seller username d
 ok(toListing({ title: 'no photo', url: raw.url, price: 5 }) === null, 'items without a photo are skipped');
 ok(JSON.stringify(splitCount(50, enabledSources()).map(([s, c]) => [s.name, c])) === '[["vinted",25],["depop",15],["ebay",10]]', 'a 50-listing refresh is split 25 Vinted / 15 Depop / 10 eBay (50/30/20)');
 
-// Floor 2: refresh on open
+// Members-only
 const t0 = new Date('2026-11-05T15:00:00Z');
-let r = await refreshForUser('alice', t0);
-ok(r.scraped === 50, 'free user: first open scrapes 50');
+let r = await refreshForUser('nina', t0);
+ok(r.scraped === 0 && r.reason === 'not-member', 'someone who has not subscribed gets no scraping (costs nothing)');
+ok(nextRefresh(store.getUser('nina'), t0).subscribe === true, '...and the app shows them "become a member"');
+process.env.TEST_MODE_EVERYONE_IS_MEMBER = 'true';
+ok(scrapeDecision(store.getUser('nina'), t0).ok, 'test mode lets everyone in (for trying it before Stripe exists)');
+delete process.env.TEST_MODE_EVERYONE_IS_MEMBER;
+const { MEMBER_PLAN } = await import('../7-money/plans.config.js');
+ok(MEMBER_PLAN.priceUsdPerMonth === 9.99 && MEMBER_PLAN.refreshesPerDay === 2 && MEMBER_PLAN.perRefresh === 150, 'the plan is $9.99 a month for 2 refreshes of 150 a day');
+
+// Floor 2: refresh on open
+setPlan('alice', 'member');
+r = await refreshForUser('alice', t0);
+ok(r.scraped === 150, 'member: first open scrapes 150');
 ok(scrapeDecision(store.getUser('alice'), new Date(t0.getTime() + 30 * 60e3)).reason === 'cooldown', 'opening again within the hour does not scrape');
 ok(nextRefresh(store.getUser('alice'), new Date(t0.getTime() + 30 * 60e3)).at === new Date(t0.getTime() + 60 * 60e3).toISOString(), 'the app can tell them when their next refresh is');
 r = await refreshForUser('alice', new Date(t0.getTime() + 61 * 60e3));
-ok(r.scraped === 50, 'after an hour, the second refresh scrapes 50');
-ok(scrapeDecision(store.getUser('alice'), new Date(t0.getTime() + 3 * 3600e3)).reason === 'daily-limit', 'a third refresh the same day is refused (100 a day)');
+ok(r.scraped === 150, 'after an hour, the second refresh scrapes 150');
+ok(scrapeDecision(store.getUser('alice'), new Date(t0.getTime() + 3 * 3600e3)).reason === 'daily-limit', 'a third refresh the same day is refused (300 a day)');
 ok(nextRefresh(store.getUser('alice'), new Date(t0.getTime() + 3 * 3600e3)).tomorrow === true, '...and the app says "new finds tomorrow"');
 ok(scrapeDecision(store.getUser('alice'), new Date('2026-11-06T15:00:00Z')).ok, 'next day, refreshes are back');
-setPlan('bob', 'premium');
+setPlan('bob', 'member');
 r = await refreshForUser('bob', t0);
-ok(r.scraped === 150, 'premium user: a refresh scrapes 150');
+ok(r.scraped === 150 && JSON.stringify(asked.slice(-3).map(a => a.body.maxListings ?? a.body.maxItems)) === '[75,45,30]', 'each refresh of 150 is split 75 Vinted / 45 Depop / 30 eBay');
 ok(asked.some(a => a.body.proxyConfiguration?.apifyProxyGroups?.[0] === 'RESIDENTIAL'), 'every scrape uses the Residential proxy');
 
 // Floor 4: style-based searches and light sharing
@@ -89,7 +100,7 @@ ok(deckFor(dave, all, { items: {} }).items.every(x => !x.scrapedFor || x.scraped
 
 // Never the same card twice
 const alice = store.getUser('alice');
-ok(alice.lastRefresh.ids.length === 50, 'a refresh remembers its own finds, so the app can put them first');
+ok(alice.lastRefresh.ids.length === 150, 'a refresh remembers its own finds, so the app can put them first');
 const top = deckFor(alice, store.loadListings(), { items: {} }).items[0];
 store.markShown('alice', [top.id]);
 ok(!deckFor(store.getUser('alice'), store.loadListings(), { items: {} }).items.some(x => x.id === top.id), 'a card someone was shown never comes back, even if they didn\'t swipe it');
@@ -111,11 +122,23 @@ await checkStale(stale);
 ok(store.loadListings().find(x => x.id === stale[0].id).status === 'sold', 'a stale listing that sold is hidden before it is shown');
 
 // Floor 7: spend guard
+const { runPaid } = await import('../1-sources/apify/apify.js');
+const realFetch = globalThis.fetch;
+const before = spentThisMonth();
+globalThis.fetch = async () => { const e = new Error('The operation timed out'); e.name = 'TimeoutError'; throw e; };
+try { await runPaid('vinted', 'test~vinted', {}, 100, 'test: a run that times out'); } catch {}
+ok(Math.abs(spentThisMonth() - before - 0.1) < 1e-6, 'a run that times out is counted at the most it could cost (Apify may still have charged)');
+const before2 = spentThisMonth();
+globalThis.fetch = async () => ({ ok: false, status: 401, text: async () => 'bad token' });
+try { await runPaid('vinted', 'test~vinted', {}, 100, 'test: a refused run'); } catch {}
+ok(spentThisMonth() === before2, 'a run Apify refuses outright (wrong token) costs nothing and is not counted');
+globalThis.fetch = realFetch;
 const spent = spentThisMonth();
 ok(spent > 0, `Apify spend is recorded ($${spent.toFixed(2)} in this test)`);
 record(330, 'test: pretend the budget is used up');
 let blocked = false; try { allow(0.01, 'test'); } catch (e) { blocked = e.code === 'BUDGET'; }
 ok(blocked, 'once the $330 budget is reached, scraping stops');
+setPlan('erin', 'member');
 r = await refreshForUser('erin', t0);
 ok(r.reason === 'budget' && r.scraped === 0, 'a user who opens the app after that gets no new scrape (stored matches only)');
 
@@ -124,7 +147,7 @@ const ev = store.readActivity();
 const types = t => ev.filter(e => e.type === t);
 ok(types('refresh-start').length === 4 && types('refresh-done').length === 4, 'every refresh is in the activity log (start and finish)');
 ok(types('refresh-skipped').some(e => e.reason === 'budget') || types('budget-block').length > 0, 'a refresh blocked by the budget is logged');
-ok(types('plan-change').some(e => e.user === 'bob' && e.to === 'premium'), 'plan changes are logged');
+ok(types('plan-change').some(e => e.user === 'bob' && e.to === 'member'), 'plan changes are logged');
 ok(types('spend').length > 0 && types('sold-check').length === 1, 'spending and sold checks are logged');
 const alerts = types('alert').map(e => e.subject);
 ok(alerts.some(s => s.startsWith('50%')) && alerts.some(s => s.startsWith('80%')) && alerts.some(s => s.startsWith('Budget reached')), 'alerts fire at 50%, 80% and 100% of the budget');

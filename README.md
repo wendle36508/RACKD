@@ -14,7 +14,7 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
 | 4. Algorithm | [`4-algorithm/`](4-algorithm/) | Reads each user's style from their swipes, builds their searches, ranks their deck, decides what can be shared. FashionCLIP reads the photos | Built, waiting for real listings |
 | 5. App | [`5-app/`](5-app/) | The swipe app and the small server behind it | Built (try it with example listings) |
 | 6. Hosting | [`6-hosting/`](6-hosting/) | Putting the app online (Vercel) | Not built |
-| 7. Money | [`7-money/`](7-money/) | Plans (free and premium), the $330/month spend guard, Stripe and affiliate placeholders | Spend guard built; Stripe and affiliate are placeholders |
+| 7. Money | [`7-money/`](7-money/) | Membership ($9.99 a month, members only), the $330/month spend guard, Stripe and affiliate placeholders | Spend guard and members-only built; Stripe and affiliate are placeholders |
 | Toolbox | [`toolbox/`](toolbox/) | Safety rails (activity log, alerts, daily summary, health check), Windows scripts, self-test | Ready |
 | Docs | [`docs/`](docs/) | The RACKD plan and build tower diagram | |
 
@@ -22,6 +22,9 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
 
 ```
  User opens RACKD
+        |
+ [7 MONEY]     Members only. Not a member? They see "Become a member" ($9.99 a
+        |      month) and nothing is scraped for them, so they cost nothing.
         |
  [5 APP]       Straight away: shows stored listings that fit their style, were
         |      confirmed for sale in the last 24 hours, and that they have NEVER
@@ -40,7 +43,7 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
  [7 MONEY]     Spend guard: is there room in this month's $330 budget? If not, skip.
         v
  [1 SOURCES]   Apify scrapes Vinted 50%, Depop 30%, eBay 20%, through the Residential
-        |      proxy. Free = 50 listings per refresh, premium = 150.
+        |      proxy. 150 listings per refresh.
         v
  [3 DATA]      New listings saved, tagged with whose search found them.
         v
@@ -58,7 +61,8 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
 | Rule | Now | File |
 |---|---|---|
 | Refreshes per user per day | 2 | `7-money/plans.config.js` |
-| Listings per refresh | free 50, premium 150 | `7-money/plans.config.js` |
+| Listings per refresh | 150 (so up to 300 a day) | `7-money/plans.config.js` |
+| Membership price | $9.99 a month (no free version) | `7-money/plans.config.js` and your Stripe product |
 | Minimum gap between refreshes | 60 minutes | `2-freshness/freshness.config.js` |
 | Re-check before showing if older than | 24 hours | `2-freshness/freshness.config.js` |
 | Site split | Vinted 50%, Depop 30%, eBay 20% | `1-sources/sources.config.js` |
@@ -71,12 +75,15 @@ Apify prices: **Vinted $1, Depop $4 and eBay $4 per 1,000 listings.** With your 
 
 | Per user, if they use every refresh | Listings a month | Cost a month |
 |---|---|---|
-| Free (100 a day) | 3,000 | $7.50 |
-| Premium (300 a day) | 9,000 | $22.50 |
+| Member (300 a day) | 9,000 | $22.50 |
 
 Sold-item checks cost the same per listing and come on top (they only happen for cards that haven't been checked in 24 hours). Residential proxy data may also be billed on top. Put it in `.env` as `PROXY_USD_PER_1000` once you know it. **The spend guard counts all of it and stops scraping when the month's $330 is used.** Users still see their stored matches.
 
-With $330 a month, that's roughly 44 free users who max out every day. Most people won't open the app twice every day, and shared listings cut the cost, so the real number is higher. Check `logs/spend.log` or open `http://localhost:3000/api/status` to see this month's spend.
+With $330 a month, that's roughly 14 members who max out every day. Most people won't open the app twice every day, and shared listings cut the cost, so the real number is higher.
+
+**Watch this:** a member pays $9.99, which is about $9.40 after Stripe's fee. A member who uses every refresh costs about $22.50 in scraping. So RACKD makes money on members who use less than about 42% of their refreshes, and loses money on the heaviest users. The daily summary and `logs/spend.log` show how it's going.
+
+**Test mode (for trying it on your laptop before Stripe exists):** `.env` has `TEST_MODE_EVERYONE_IS_MEMBER=true`, so everyone counts as a member. **Leave it blank before real users arrive.** While it's on, the health check shows Floor 7 amber. When Stripe is set up, put your payment link in `.env` as `STRIPE_CHECKOUT_URL` and the "Become a member" button goes there. Check `logs/spend.log` or open `http://localhost:3000/api/status` to see this month's spend.
 
 ## Safety rails: nothing fires (or fails) without you knowing
 

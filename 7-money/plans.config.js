@@ -1,20 +1,24 @@
-// The plans a user can be on, and how many NEW listings RACKD scrapes for them.
-// Each user gets a few refreshes a day (one per app open, at least an hour apart).
-// Change the numbers here and everything else follows.
-export const PLANS = {
-  free: {
-    refreshesPerDay: 2,
-    perRefresh: 50,         // 2 x 50 = 100 new listings a day
-    priceUsdPerMonth: 0,
-  },
-  premium: {
-    refreshesPerDay: 2,
-    perRefresh: 150,        // 2 x 150 = 300 new listings a day
-    priceUsdPerMonth: null, // decide later. Stripe sets a user to premium (7-money/stripe.js)
-  },
+// RACKD is members-only (Tanner, 4 Nov 2026): there is no free version.
+// Every member gets the same plan. Change the numbers here and everything else follows.
+export const MEMBER_PLAN = {
+  refreshesPerDay: 2,
+  perRefresh: 150,          // 2 x 150 = up to 300 new listings a day per member
+  priceUsdPerMonth: 9.99,   // Tanner, 4 Nov 2026. Set the same price on the Stripe product
 };
 
+export const SUBSCRIPTION = {
+  trialDays: 0,             // free trial before the first charge (0 = pay to start). Not decided yet
+  // Where the "Subscribe" button goes: your Stripe payment link (put it in .env when Stripe exists)
+  checkoutUrl: () => (process.env.STRIPE_CHECKOUT_URL || '').trim(),
+  // TEST MODE, for trying RACKD on your laptop before Stripe exists: everyone counts as a
+  // member. Must be off before real users arrive (the health check shows it as amber).
+  testModeEveryoneIsMember: () => /^(1|true|yes)$/i.test((process.env.TEST_MODE_EVERYONE_IS_MEMBER || '').trim()),
+};
+
+export const isMember = user => SUBSCRIPTION.testModeEveryoneIsMember() || ['member', 'premium'].includes(user?.plan);
+
+/** The member plan for members; null for anyone who hasn't subscribed (they get no scraping). */
 export function planFor(user) {
-  const p = PLANS[user?.plan] || PLANS.free;
-  return { ...p, dailyCap: p.refreshesPerDay * p.perRefresh };
+  if (!isMember(user)) return null;
+  return { ...MEMBER_PLAN, dailyCap: MEMBER_PLAN.refreshesPerDay * MEMBER_PLAN.perRefresh };
 }
