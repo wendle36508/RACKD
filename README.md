@@ -83,7 +83,9 @@ With $330 a month, that's roughly 14 members who max out every day. Most people 
 
 **Watch this:** a member pays $9.99, which is about $9.40 after Stripe's fee. A member who uses every refresh costs about $22.50 in scraping. So RACKD makes money on members who use less than about 42% of their refreshes, and loses money on the heaviest users. The daily summary and `logs/spend.log` show how it's going.
 
-**Test mode (for trying it on your laptop before Stripe exists):** `.env` has `TEST_MODE_EVERYONE_IS_MEMBER=true`, so everyone counts as a member. **Leave it blank before real users arrive.** While it's on, the health check shows Floor 7 amber. When Stripe is set up, put your payment link in `.env` as `STRIPE_CHECKOUT_URL` and the "Become a member" button goes there. Check `logs/spend.log` or open `http://localhost:3000/api/status` to see this month's spend.
+**No free trial or demo:** people subscribe ($9.99, charged at sign-up) before they get any finds.
+
+**Test mode (only for you, on your laptop, before Stripe exists):** it's off. Set `TEST_MODE_EVERYONE_IS_MEMBER=true` in `.env` to try the app yourself, and **set it back to blank afterwards.** While it's on, the health check shows Floor 7 amber. When Stripe is set up, put your payment link in `.env` as `STRIPE_CHECKOUT_URL` and the "Become a member" button goes there. Check `logs/spend.log` or open `http://localhost:3000/api/status` to see this month's spend.
 
 ## Safety rails: nothing fires (or fails) without you knowing
 

@@ -7,7 +7,7 @@ export const MEMBER_PLAN = {
 };
 
 export const SUBSCRIPTION = {
-  trialDays: 0,             // free trial before the first charge (0 = pay to start). Not decided yet
+  trialDays: 0,             // Tanner, 4 Nov 2026: no free trial or demo. People pay to start, charged at sign-up
   // Where the "Subscribe" button goes: your Stripe payment link (put it in .env when Stripe exists)
   checkoutUrl: () => (process.env.STRIPE_CHECKOUT_URL || '').trim(),
   // TEST MODE, for trying RACKD on your laptop before Stripe exists: everyone counts as a

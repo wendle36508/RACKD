@@ -3,7 +3,8 @@
 // or cancels. This file reads it and makes them a member (or not). Members get refreshes
 // (7-money/plans.config.js); everyone else sees "subscribe to start" and costs nothing.
 // Needs STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and STRIPE_CHECKOUT_URL in .env.
-// A free trial, if Tanner wants one, is set on the Stripe price (trialDays in plans.config.js).
+// No free trial (Tanner, 4 Nov 2026): the Stripe subscription charges $9.99 at sign-up, and
+// the person becomes a member the moment Stripe confirms the payment.
 import { getUser, saveUser } from '../3-data/store.js';
 import { activity } from '../toolbox/alerts.js';
 
