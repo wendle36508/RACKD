@@ -28,10 +28,9 @@ globalThis.fetch = async (url, opts) => {
   } else if (String(url).includes('vinted')) {
     items = body.startUrls ? body.startUrls.map(({ url }) => ({ id: url.split('/').pop(), url, title: 'v', photo: { url: 'https://e.com/v.jpg' }, price: '20' }))
       : Array.from({ length: body.maxItems }, () => { n++; return { id: n, url: `https://www.vinted.com/items/${n}`, title: 'Vinted ' + n, photo: { url: 'https://e.com/v.jpg' }, price: '18.00', brand_title: 'Levis', size_title: 'M' }; });
-  } else if (body.mode === 'url') {
-    items = body.urls.map((u, i) => ({ url: u, sold: i === 0, title: 'x', mainPicture: 'https://e.com/a.jpg', price: 25 }));
   } else {
-    items = Array.from({ length: body.maxListings }, () => { n++; return { title: 'Depop ' + n, url: `https://www.depop.com/products/item-${n}/`, mainPicture: 'https://e.com/d.jpg', price: 30, brandName: 'Levis', style: ['vintage'], sizes: ['M'] }; });
+    // shaped like piotrv1001/depop-listings-scraper output
+    items = Array.from({ length: body.maxItems }, () => { n++; return { id: String(n), slug: `item-${n}`, url: `https://www.depop.com/products/item-${n}/`, description: `Levis vintage jacket ${n}\n#levis #vintage`, price: 30, originalPrice: 30, currency: 'USD', brand: 'Levis', condition: 'used_good', categoryName: 'Jackets', sizes: ['M'], status: 'STATUS_ONSALE', images: ['https://e.com/d.jpg'] }; });
   }
   return { ok: true, json: async () => items, text: async () => '' };
 };
@@ -52,11 +51,15 @@ let failed = 0;
 const ok = (cond, msg) => { console.log((cond ? 'PASS ' : 'FAIL ') + msg); if (!cond) failed++; };
 
 // Floor 1: turning a raw Depop item into a RACKD listing
-const raw = { title: 'Test jacket', url: 'https://www.depop.com/products/test-jacket-1a2b/', mainPicture: 'https://example.com/a.jpg',
-  price: { priceAmount: '35.00', currencyName: 'USD' }, sizes: ['M'], brandName: "Levi's", sellerUsername: 'should-be-dropped' };
+const raw = { id: '960104883', slug: 'test-jacket-1a2b', url: 'https://www.depop.com/products/test-jacket-1a2b/', description: "Levi's trucker jacket, barely worn #levis #y2k\nSize M",
+  price: 35, originalPrice: 50, currency: 'USD', brand: "Levi's", condition: 'used_excellent', categoryName: 'Jackets', sizes: ['M'], status: 'STATUS_ONSALE',
+  images: ['https://example.com/a.jpg', 'https://example.com/b.jpg'], location: 'Boston, MA', sellerUsername: 'should-be-dropped' };
 const l = toListing(raw);
-ok(l && l.id === 'depop:test-jacket-1a2b' && l.price === 35 && l.size === 'M', 'Depop item is converted (id, price, size)');
-ok(l && !('sellerUsername' in l) && problems(l).length === 0, 'seller username dropped, listing passes the rules');
+ok(l && l.id === 'depop:test-jacket-1a2b' && l.price === 35 && l.originalPrice === 50 && l.size === 'M' && l.title === "Levi's trucker jacket, barely worn" && l.condition === 'Excellent' && l.photoUrls.length === 2, 'Depop item from your scraper is converted (id, title, price, markdown, size, condition, photos)');
+const { searchInput } = await import('../1-sources/depop/depop.config.js');
+const di = searchInput({ queries: ['levis'], brands: ['Not A Depop Brand'], minPrice: 9.5, maxPrice: 40.2 }, 45);
+ok(di.searchQueries[0] === 'levis' && di.maxItems === 45 && di.priceMin === 9 && di.priceMax === 41 && !('brands' in di), 'Depop search uses your scraper\'s fields, and never sends a brand filter that could stop the run');
+ok(l && !('sellerUsername' in l) && !JSON.stringify(l).includes('Boston') && problems(l).length === 0, 'seller details dropped, listing passes the rules');
 ok(toListing({ title: 'no photo', url: raw.url, price: 5 }) === null, 'items without a photo are skipped');
 ok(JSON.stringify(splitCount(50, enabledSources()).map(([s, c]) => [s.name, c])) === '[["vinted",25],["depop",15],["ebay",10]]', 'a 50-listing refresh is split 25 Vinted / 15 Depop / 10 eBay (50/30/20)');
 
@@ -118,10 +121,17 @@ ok(ebayItem && buyLink(ebayItem).includes('campid=5338000000'), 'eBay listings a
 delete process.env.EBAY_CAMPAIGN_ID;
 
 // Floor 2: sold check before showing
-const stale = all.filter(x => x.source === 'depop').slice(0, 3).map(x => ({ ...x, lastCheckedAt: '2026-01-01T00:00:00Z' }));
+const stale = all.filter(x => x.source === 'ebay').slice(0, 3).map(x => ({ ...x, lastCheckedAt: '2026-01-01T00:00:00Z' }));
 store.updateListings(stale);
+const callsBefore = asked.length;
 await checkStale(stale);
-ok(store.loadListings().find(x => x.id === stale[0].id).status === 'sold', 'a stale listing that sold is hidden before it is shown');
+ok(asked.length === callsBefore + 1 && store.loadListings().find(x => x.id === stale[0].id).lastCheckedAt > '2026-01-01', 'a stale listing is re-checked with the scraper before it is shown');
+const staleDepop = all.filter(x => x.source === 'depop').slice(0, 2).map(x => ({ ...x, lastCheckedAt: '2026-01-01T00:00:00Z' }));
+store.updateListings(staleDepop);
+const calls2 = asked.length;
+await checkStale(staleDepop);
+const { isFresh } = await import('../2-freshness/check-before-show.js');
+ok(asked.length === calls2 && !isFresh(store.loadListings().find(x => x.id === staleDepop[0].id)), 'Depop listings older than 24 hours cost nothing to check: they just stay hidden unless a refresh finds them again');
 
 // Floor 7: spend guard
 const { runPaid } = await import('../1-sources/apify/apify.js');

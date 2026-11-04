@@ -2,6 +2,8 @@
 // Before a listing goes on someone's screen, RACKD makes sure it was confirmed for sale
 // recently. Listings older than the stale limit are re-checked with the scraper first:
 // sold ones are hidden for good, ones that vanish twice in a row are taken down.
+// A source whose scraper can't re-check single listings (Depop, for now) is skipped: its
+// listings simply stay hidden once they're older than the limit, at no cost.
 import { logger } from '../toolbox/env.js';
 import { sourceFor } from '../1-sources/index.js';
 import { updateListings } from '../3-data/store.js';
@@ -15,7 +17,7 @@ export const isFresh = (l, now = Date.now()) =>
 
 /** Re-checks the stale ones among `listings`. Returns how many are still for sale. */
 export async function checkStale(listings, now = new Date()) {
-  const stale = listings.filter(l => l.status === 'active' && !isFresh(l, now.getTime()) && sourceFor(l)).slice(0, FRESHNESS.checkBeforeShow);
+  const stale = listings.filter(l => l.status === 'active' && !isFresh(l, now.getTime()) && sourceFor(l)?.checkListings).slice(0, FRESHNESS.checkBeforeShow);
   const bySource = {};
   for (const l of stale) (bySource[l.source] ||= []).push(l);
 

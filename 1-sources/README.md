@@ -9,7 +9,7 @@ Gets listings from resale sites through Apify. Each site has its own folder, and
 |---|---|
 | `sources.config.js` | Price per 1,000 listings for each site (Vinted $1, Depop $4, eBay $4) and the split of each refresh (Vinted 50%, Depop 30%, eBay 20%) |
 | `apify/apify.js` | Starts an Apify scraper and collects the results. Every run asks the spend guard first, and every run uses **Apify Proxy, Residential, US** |
-| `depop/` | **PLACEHOLDER config.** `depop.config.js` = scraper settings (lines marked CHECK must match the actor's Input tab), `map.js` = turns a Depop item into a RACKD listing |
+| `depop/` | **Ready.** Uses [piotrv1001/depop-listings-scraper](https://apify.com/piotrv1001/depop-listings-scraper) ($4 per 1,000, Apify costs included). `depop.config.js` = scraper settings, `map.js` = turns a Depop item into a RACKD listing. This scraper can't re-check single listings, so Depop items are shown only for 24 hours after a search finds them (no paid sold check) |
 | `vinted/` | **PLACEHOLDER config**, same layout. No Vinted actor chosen yet: put its id in `.env` as `VINTED_ACTOR_ID` |
 | `ebay/` | **PLACEHOLDER config**, same layout. eBay's own API is out (account suspended), so eBay also comes through Apify: put the actor's id in `.env` as `EBAY_ACTOR_ID`. eBay Buy links get your eBay Ambassador id (floor 7) |
 | `index.js` | The list of sites. `SOURCES=vinted,depop,ebay` in `.env` switches them on |

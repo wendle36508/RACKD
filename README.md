@@ -131,7 +131,7 @@ To get the latest changes later, tell Claude Code *"pull the latest rackd"* (or 
 ## When the scraper and proxy arrive
 
 1. Put your Apify token in `.env` (above).
-2. Put each actor's id in `.env`: `DEPOP_ACTOR_ID` and `VINTED_ACTOR_ID` (the part of the actor's apify.com address like `abotapi~depop-scraper`). Switch both on with `SOURCES=depop,vinted`.
+2. Put each actor's id in `.env`: `DEPOP_ACTOR_ID` and `VINTED_ACTOR_ID` (the part of the actor's apify.com address like `piotrv1001~depop-listings-scraper`). Switch both on with `SOURCES=depop,vinted`.
 3. Open each actor's **Input** tab on apify.com and compare it with `1-sources/depop/depop.config.js` and `1-sources/vinted/vinted.config.js`. Lines marked **CHECK** are the ones to confirm. The proxy is already set to Apify Proxy, Residential, US.
 4. In `RACKD.bat` pick **2** to start the app. Opening it runs your first refresh, and new finds appear within a minute or two.
 
