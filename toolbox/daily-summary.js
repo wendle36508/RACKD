@@ -24,7 +24,7 @@ export function summarize(day) {
     `RACKD daily summary for ${day}`,
     ``,
     `App opens: ${count('app-open').length} (by ${users.size} users)`,
-    `Refreshes run: ${done.length}. Listings pulled: ${done.reduce((s, e) => s + (e.scraped || 0), 0)} (${done.reduce((s, e) => s + (e.added || 0), 0)} new to RACKD)`,
+    `Refreshes run: ${done.length}. Listings pulled: ${done.reduce((s, e) => s + (e.scraped || 0), 0)} (${done.reduce((s, e) => s + (e.added || 0), 0)} new to RACKD, ${done.reduce((s, e) => s + (e.repeats || 0), 0)} repeats the person had already seen, hidden)`,
     `Refreshes skipped: ${skipped.length}${skipped.length ? ' (' + Object.entries(why).map(([k, v]) => `${k}: ${v}`).join(', ') + ')' : ''}`,
     `Sold checks: ${checks.reduce((s, e) => s + e.checked, 0)} listings checked, ${checks.reduce((s, e) => s + e.sold, 0)} sold, ${checks.reduce((s, e) => s + e.removed, 0)} taken down`,
     `Plan changes: ${count('plan-change').length}. Stripe events: ${count('stripe-event').length}`,

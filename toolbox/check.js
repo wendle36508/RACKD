@@ -12,8 +12,9 @@ process.env.RACKD_DATA_DIR = tmp;          // test data and logs go in a throwaw
 process.env.RACKD_LOG_DIR = path.join(tmp, 'logs');
 delete process.env.RESEND_API_KEY;         // never send real alert emails from a test
 process.env.APIFY_TOKEN = 'fake-token-for-test';
-process.env.SOURCES = 'depop,vinted';
+process.env.SOURCES = 'vinted,depop,ebay';
 process.env.VINTED_ACTOR_ID = 'test~vinted';
+process.env.EBAY_ACTOR_ID = 'test~ebay';
 
 // Fake Apify: returns made-up listings and counts what was asked for.
 const asked = [];
@@ -21,7 +22,10 @@ let n = 0;
 globalThis.fetch = async (url, opts) => {
   const body = JSON.parse(opts.body); asked.push({ url: String(url), body });
   let items;
-  if (String(url).includes('vinted')) {
+  if (String(url).includes('ebay')) {
+    items = body.startUrls ? body.startUrls.map(({ url }) => ({ url, title: 'e', image: 'https://e.com/e.jpg', price: '30' }))
+      : Array.from({ length: body.maxItems }, () => { n++; return { url: `https://www.ebay.com/itm/${100000000 + n}`, title: 'eBay ' + n, image: 'https://e.com/e.jpg', price: { value: '25.00' }, brand: 'Levis', size: 'M' }; });
+  } else if (String(url).includes('vinted')) {
     items = body.startUrls ? body.startUrls.map(({ url }) => ({ id: url.split('/').pop(), url, title: 'v', photo: { url: 'https://e.com/v.jpg' }, price: '20' }))
       : Array.from({ length: body.maxItems }, () => { n++; return { id: n, url: `https://www.vinted.com/items/${n}`, title: 'Vinted ' + n, photo: { url: 'https://e.com/v.jpg' }, price: '18.00', brand_title: 'Levis', size_title: 'M' }; });
   } else if (body.mode === 'url') {
@@ -37,7 +41,7 @@ const { toListing } = await import('../1-sources/depop/map.js');
 const { splitCount, enabledSources } = await import('../1-sources/index.js');
 const { problems } = await import('../3-data/validate.js');
 const store = await import('../3-data/store.js');
-const { scrapeDecision, refreshForUser } = await import('../2-freshness/on-open.js');
+const { scrapeDecision, refreshForUser, nextRefresh } = await import('../2-freshness/on-open.js');
 const { checkStale } = await import('../2-freshness/check-before-show.js');
 const { deckFor } = await import('../4-algorithm/deck.js');
 const { profileOf, searchFor } = await import('../4-algorithm/taste.js');
@@ -54,16 +58,18 @@ const l = toListing(raw);
 ok(l && l.id === 'depop:test-jacket-1a2b' && l.price === 35 && l.size === 'M', 'Depop item is converted (id, price, size)');
 ok(l && !('sellerUsername' in l) && problems(l).length === 0, 'seller username dropped, listing passes the rules');
 ok(toListing({ title: 'no photo', url: raw.url, price: 5 }) === null, 'items without a photo are skipped');
-ok(JSON.stringify(splitCount(50, enabledSources()).map(([s, c]) => [s.name, c])) === '[["depop",25],["vinted",25]]', 'a 50-listing refresh is split 25 Depop / 25 Vinted');
+ok(JSON.stringify(splitCount(50, enabledSources()).map(([s, c]) => [s.name, c])) === '[["vinted",25],["depop",15],["ebay",10]]', 'a 50-listing refresh is split 25 Vinted / 15 Depop / 10 eBay (50/30/20)');
 
 // Floor 2: refresh on open
 const t0 = new Date('2026-11-05T15:00:00Z');
 let r = await refreshForUser('alice', t0);
 ok(r.scraped === 50, 'free user: first open scrapes 50');
 ok(scrapeDecision(store.getUser('alice'), new Date(t0.getTime() + 30 * 60e3)).reason === 'cooldown', 'opening again within the hour does not scrape');
+ok(nextRefresh(store.getUser('alice'), new Date(t0.getTime() + 30 * 60e3)).at === new Date(t0.getTime() + 60 * 60e3).toISOString(), 'the app can tell them when their next refresh is');
 r = await refreshForUser('alice', new Date(t0.getTime() + 61 * 60e3));
 ok(r.scraped === 50, 'after an hour, the second refresh scrapes 50');
 ok(scrapeDecision(store.getUser('alice'), new Date(t0.getTime() + 3 * 3600e3)).reason === 'daily-limit', 'a third refresh the same day is refused (100 a day)');
+ok(nextRefresh(store.getUser('alice'), new Date(t0.getTime() + 3 * 3600e3)).tomorrow === true, '...and the app says "new finds tomorrow"');
 ok(scrapeDecision(store.getUser('alice'), new Date('2026-11-06T15:00:00Z')).ok, 'next day, refreshes are back');
 setPlan('bob', 'premium');
 r = await refreshForUser('bob', t0);
@@ -80,6 +86,23 @@ const deck = deckFor(carol, all, { items: {} }, { limit: 50 }).items;
 ok(deck.length > 0 && deck.filter(x => x.scrapedFor !== 'carol').length <= Math.floor(50 * 0.2), 'other people\'s finds are at most 20% of a deck, and only strong matches');
 const dave = { id: 'dave', liked: [], passed: [] };
 ok(deckFor(dave, all, { items: {} }).items.every(x => !x.scrapedFor || x.scrapedFor === 'dave'), 'a brand-new user gets no shared listings');
+
+// Never the same card twice
+const alice = store.getUser('alice');
+ok(alice.lastRefresh.ids.length === 50, 'a refresh remembers its own finds, so the app can put them first');
+const top = deckFor(alice, store.loadListings(), { items: {} }).items[0];
+store.markShown('alice', [top.id]);
+ok(!deckFor(store.getUser('alice'), store.loadListings(), { items: {} }).items.some(x => x.id === top.id), 'a card someone was shown never comes back, even if they didn\'t swipe it');
+const bobsFind = store.loadListings().find(x => x.scrapedFor === 'bob');
+store.upsertFound([bobsFind], 'frank');
+ok(deckFor(store.getUser('frank'), store.loadListings(), { items: {} }).items.some(x => x.id === bobsFind.id), 'a listing someone else found first still counts as yours when your refresh finds it');
+const P = profileOf({ liked: [], passed: [] }, byId);
+ok(searchFor(P, 0).queries.join() !== searchFor(P, 1).queries.join(), 'each refresh searches for something a bit different, so fewer repeats come back');
+const ebayItem = store.loadListings().find(x => x.source === 'ebay');
+const { buyLink } = await import('../7-money/affiliate.js');
+process.env.EBAY_CAMPAIGN_ID = '5338000000';
+ok(ebayItem && buyLink(ebayItem).includes('campid=5338000000'), 'eBay listings are scraped and their Buy links carry your eBay affiliate id');
+delete process.env.EBAY_CAMPAIGN_ID;
 
 // Floor 2: sold check before showing
 const stale = all.filter(x => x.source === 'depop').slice(0, 3).map(x => ({ ...x, lastCheckedAt: '2026-01-01T00:00:00Z' }));

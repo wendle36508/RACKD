@@ -128,7 +128,9 @@ const DATA = __DATA__;
 const VEC = __VEC__;
 // LIVE is filled in by the server (5-app/server.js). In the offline file it is null.
 const LIVE = __LIVE__;
-let liveLoading = false;
+let liveLoading = false, liveRefreshing = false, openInfo = null;
+const freshIds = new Set();   // cards from this open's refresh: they go to the front
+const shownQ = new Set(); let shownT = null;   // cards on screen, waiting to be reported
 const api=(u,b)=>fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(r=>r.json()).catch(()=>null);
 const items = DATA.map((d,i)=>({...d,id:i}));
 // ---------- FashionCLIP fingerprints ----------
@@ -204,14 +206,16 @@ let queue=[];
 function rebuild(){
   const seen=new Set(state.seen);
   const rest=baseOrder.filter(id=>!seen.has(id));
-  if(state.liked.length<2){queue=rest;return;}
+  if(state.liked.length<2){queue=freshFirst(rest);return;}
   const P=profile();
   const ranked=rest.map(id=>({id,s:score(items[id],P)+Math.random()*0.6})).sort((a,b)=>b.s-a.s).map(x=>x.id);
   // every 5th card is a wildcard so the deck keeps exploring
   queue=[]; let wild=rest.filter(id=>!ranked.slice(0,40).includes(id)).sort(()=>Math.random()-.5);
   queue=ranked;
   if(state.seen.length%5===4 && wild.length) queue=[wild[0],...ranked.filter(x=>x!==wild[0])];
+  queue=freshFirst(queue);
 }
+function freshFirst(q){return freshIds.size? [...q.filter(id=>freshIds.has(id)),...q.filter(id=>!freshIds.has(id))] : q;}
 
 // ---------- cards ----------
 const deck=$('#deck');
@@ -232,8 +236,11 @@ function cardHTML(it,P){
 }
 function render(){
   deck.innerHTML='';
-  if(!queue.length && LIVE && liveLoading){
+  if(!queue.length && LIVE && liveLoading && liveRefreshing){
     deck.innerHTML=`<div class="empty"><h2>Finding fresh pieces for you</h2><p class="muted">RACKD is pulling new listings that fit your style. They'll appear here in a minute.</p></div>`; return;
+  }
+  if(!queue.length && LIVE){
+    deck.innerHTML=`<div class="empty"><h2>You're all caught up</h2><p class="muted">${esc(caughtUp())}</p></div>`; return;
   }
   if(!queue.length){
     deck.innerHTML=`<div class="empty"><h2>You've seen the whole rack</h2><p class="muted">All ${items.length} listings swiped. Check your style and liked items, or start over.</p><button class="linkbtn" id="resetBtn2">Start over</button></div>`;
@@ -247,6 +254,7 @@ function render(){
   // preload the next few photos
   queue.slice(2,6).forEach(id=>{const i=new Image(); i.referrerPolicy='no-referrer'; i.src=items[id].p;});
   attachDrag(deck.lastElementChild);
+  markShown(items[queue[0]].k);
 }
 function attachDrag(el){
   let sx=0,sy=0,dx=0,dy=0,drag=false;
@@ -311,7 +319,7 @@ function styleView(){
   <div class="panel"><h3>Brands you like</h3>${bars(br,br[0]?br[0][1]:1)}</div>
   <div class="panel"><h3>What you go for</h3>${bars(ct,ct[0]?ct[0][1]:1)}</div>
   <div class="panel"><h3>Your price sweet spot</h3><div class="big">$${lo}–$${hi}</div><p class="muted">Typical liked price $${P.med}. Listings near this get a boost.</p></div>
-  <button class="linkbtn" id="resetBtn">Reset and start a new demo</button>`;
+  <button class="linkbtn" id="resetBtn">${LIVE?'Reset my style':'Reset and start a new demo'}</button>`;
   $('#resetBtn').onclick=reset;
 }
 function likedView(){
@@ -323,7 +331,7 @@ function likedView(){
   <a href="${esc(it.u)}" target="_blank" rel="noopener">View on ${esc(it.src||'seller site')}</a></div></div>`}).join('')}</div>`;
 }
 function updateCount(){$('#likedCount').textContent=state.liked.length;}
-function reset(){if(LIVE) api('/api/swipe',{dir:'reset'}); state={seen:[],liked:[],passed:[],history:[]};save();rebuild();show('swipe');render();updateCount();}
+function reset(){if(LIVE){ api('/api/swipe',{dir:'reset'}).then(()=>location.reload()); return; } state={seen:[],liked:[],passed:[],history:[]};save();rebuild();show('swipe');render();updateCount();}
 function show(v){['swipe','style','liked'].forEach(k=>{$('#view-'+k).hidden=k!==v;$('#tab-'+k).setAttribute('aria-selected',k===v)});
   if(v==='style')styleView(); if(v==='liked')likedView();}
 ['swipe','style','liked'].forEach(k=>$('#tab-'+k).onclick=()=>show(k));
@@ -335,11 +343,24 @@ rebuild(); render(); updateCount();
 // Tells the server the app was opened (it scrapes new listings for this user's style,
 // at most once an hour), then checks every few seconds for new cards while it works.
 function addCards(cards){
-  const known=new Set(items.map(i=>i.k)); let n=0;
-  cards.forEach(d=>{ if(known.has(d.k)) return; const id=items.length; items.push({...d,id}); baseOrder.push(id); n++; });
+  const known=new Set(items.map(i=>i.k)); let n=0, nf=0;
+  cards.forEach(d=>{ if(known.has(d.k)) return; const id=items.length; items.push({...d,id}); baseOrder.push(id); n++;
+    if(liveRefreshing && d.nw){ freshIds.add(id); nf++; } });
   if(!n) return;
   const wasEmpty=!queue.length; rebuild(); if(wasEmpty) render();
-  toast(`${n} new ${n===1?'find':'finds'} added to your rack`);
+  toast(nf? `${nf} new ${nf===1?'find':'finds'} just landed, up next` : `${n} more ${n===1?'piece':'pieces'} added to your rack`);
+}
+// Every card is reported to the server the moment it's on screen, so it never comes back.
+function markShown(k){ if(!LIVE||!k) return; shownQ.add(k); clearTimeout(shownT); shownT=setTimeout(flushShown,1500); }
+function flushShown(onLeave){ if(!shownQ.size) return; const ids=[...shownQ]; shownQ.clear();
+  if(onLeave && navigator.sendBeacon) navigator.sendBeacon('/api/shown', JSON.stringify({ids})); else api('/api/shown',{ids}); }
+addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') flushShown(true); });
+addEventListener('pagehide',()=>flushShown(true));
+function caughtUp(){
+  const n=openInfo&&openInfo.next;
+  if(n&&n.tomorrow) return "You've had today's refreshes. New finds tomorrow.";
+  if(n&&n.at) return 'Your next refresh is at '+new Date(n.at).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+'. Open RACKD then for new finds.';
+  return 'No new finds right now. Check back soon.';
 }
 async function poll(){
   const r=await api('/api/more',{known:items.map(i=>i.k)});
@@ -347,7 +368,7 @@ async function poll(){
   if(liveLoading) setTimeout(poll,4000); else if(!queue.length) render();
 }
 if(LIVE){
-  api('/api/open').then(r=>{ liveLoading=true; if(!queue.length) render(); setTimeout(poll,3000); });
+  api('/api/open').then(r=>{ openInfo=r; liveRefreshing=!!(r&&r.scraping); liveLoading=true; if(!queue.length) render(); setTimeout(poll,3000); });
 }
 </script>
 </body>

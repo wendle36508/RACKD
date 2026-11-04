@@ -6,7 +6,7 @@
 // While the scrape runs (it takes a minute or two), the app shows their stored matches.
 import { logger } from '../toolbox/env.js';
 import { enabledSources, splitCount } from '../1-sources/index.js';
-import { getUser, saveUser, loadListings, addNew, loadFingerprints } from '../3-data/store.js';
+import { getUser, saveUser, loadListings, upsertFound, loadFingerprints } from '../3-data/store.js';
 import { problems } from '../3-data/validate.js';
 import { profileOf, searchFor } from '../4-algorithm/taste.js';
 import { planFor } from '../7-money/plans.config.js';
@@ -14,7 +14,8 @@ import { FRESHNESS } from './freshness.config.js';
 import { activity, alert } from '../toolbox/alerts.js';
 
 const log = logger('on-open');
-const today = now => now.toISOString().slice(0, 10);
+// A "day" for the refresh limit runs midnight to midnight in this time zone (US Eastern).
+const today = now => now.toLocaleDateString('en-CA', { timeZone: FRESHNESS.dayTimeZone });
 
 /** Should we scrape for this user right now, and how many? (No side effects.) */
 export function scrapeDecision(user, now = new Date()) {
@@ -46,21 +47,30 @@ export async function refreshForUser(userId, now = new Date()) {
   user.lastScrapeAt = now.toISOString();       // set first, so a second open can't start another
   if (user.day?.date !== today(now)) user.day = { date: today(now), count: 0, refreshes: 0 };
   user.day.refreshes = (user.day.refreshes || 0) + 1;
+  const rotation = user.searchCursor || 0;     // each refresh searches a different slice of their style
+  user.searchCursor = rotation + 1;
+  user.lastRefresh = { at: now.toISOString(), ids: [] };   // what this refresh finds goes to the front
   saveUser(user);
 
-  let scraped = 0, added = 0, reason = 'done';
+  let scraped = 0, added = 0, repeats = 0, reason = 'done';
   const errors = [];
   activity('refresh-start', { user: userId, plan: user.plan || 'free', asked: d.count, refreshToday: user.day.refreshes });
   try {
     const listings = loadListings();
     const P = profileOf(user, new Map(listings.map(l => [l.id, l])), loadFingerprints());
-    const search = searchFor(P);
+    const search = searchFor(P, rotation);
     for (const [src, n] of splitCount(d.count, enabledSources())) {
       try {
         const found = await src.search(search, n, `${src.name} for ${userId}`);
         scraped += found.length;
-        const good = found.filter(l => !problems(l).length).map(l => ({ ...l, scrapedFor: userId }));
-        added += addNew(good).length;
+        const good = found.filter(l => !problems(l).length);
+        const r = upsertFound(good, userId);
+        added += r.added;
+        const u = getUser(userId);
+        const seen = new Set([...u.liked, ...u.passed, ...(u.shown || [])]);
+        repeats += r.ids.filter(id => seen.has(id)).length;      // already seen by them, so hidden
+        u.lastRefresh = { at: u.lastRefresh?.at || now.toISOString(), ids: [...(u.lastRefresh?.ids || []), ...r.ids] };
+        saveUser(u);
       } catch (e) {
         log(`${src.name} for ${userId}: ${e.message}`);
         if (e.code === 'BUDGET') { reason = 'budget'; break; }
@@ -71,8 +81,8 @@ export async function refreshForUser(userId, now = new Date()) {
     const u = getUser(userId);
     u.day.count += scraped;                    // listings paid for today, shown in /api/status
     saveUser(u);
-    log(`${userId}: asked ${d.count} (${search.personal ? 'personal: ' : 'starter: '}${search.queries.join(', ')}), got ${scraped}, ${added} new.`);
-    activity('refresh-done', { user: userId, asked: d.count, scraped, added, reason, searches: search.queries, errors });
+    log(`${userId}: asked ${d.count} (${search.personal ? 'personal: ' : 'starter: '}${search.queries.join(', ')}), got ${scraped}, ${added} new to RACKD, ${repeats} they'd already seen.`);
+    activity('refresh-done', { user: userId, asked: d.count, scraped, added, repeats, reason, searches: search.queries, errors });
     if (errors.length) alert('A scrape failed', `Refresh for user ${userId}:\n${errors.join('\n')}`);
   } catch (e) {
     activity('refresh-done', { user: userId, asked: d.count, scraped, added, reason: 'crash', errors: [e.message] });
@@ -85,3 +95,13 @@ export async function refreshForUser(userId, now = new Date()) {
 }
 
 export const isRunning = userId => running.has(userId);
+
+/** When this user's next refresh can happen (for the app's "all caught up" message). */
+export function nextRefresh(user, now = new Date()) {
+  const d = scrapeDecision(user, now);
+  if (d.ok) return { now: true };
+  if (d.reason === 'daily-limit') return { tomorrow: true };
+  const refreshesToday = user.day?.date === today(now) ? user.day.refreshes || 0 : 0;
+  if (refreshesToday >= planFor(user).refreshesPerDay) return { tomorrow: true };
+  return { at: d.nextAt };
+}

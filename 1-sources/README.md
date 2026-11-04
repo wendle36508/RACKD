@@ -7,12 +7,13 @@ Gets listings from resale sites through Apify. Each site has its own folder, and
 
 | File | What it is |
 |---|---|
-| `sources.config.js` | Price per 1,000 listings for each site (Depop $4, Vinted $1) and the split of each refresh (50/50) |
+| `sources.config.js` | Price per 1,000 listings for each site (Vinted $1, Depop $4, eBay $4) and the split of each refresh (Vinted 50%, Depop 30%, eBay 20%) |
 | `apify/apify.js` | Starts an Apify scraper and collects the results. Every run asks the spend guard first, and every run uses **Apify Proxy, Residential, US** |
 | `depop/` | **PLACEHOLDER config.** `depop.config.js` = scraper settings (lines marked CHECK must match the actor's Input tab), `map.js` = turns a Depop item into a RACKD listing |
 | `vinted/` | **PLACEHOLDER config**, same layout. No Vinted actor chosen yet: put its id in `.env` as `VINTED_ACTOR_ID` |
-| `index.js` | The list of sites. `SOURCES=depop,vinted` in `.env` switches them on |
+| `ebay/` | **PLACEHOLDER config**, same layout. eBay's own API is out (account suspended), so eBay also comes through Apify: put the actor's id in `.env` as `EBAY_ACTOR_ID`. eBay Buy links get your eBay Ambassador id (floor 7) |
+| `index.js` | The list of sites. `SOURCES=vinted,depop,ebay` in `.env` switches them on |
 
 Only listing facts are kept (title, price, size, photo, link, seller rating). Seller usernames and ids are dropped.
 
-**Adding another site later (Etsy, eBay, Grailed):** copy the `depop` folder, change the config and `map.js`, and add one line to `index.js` and `sources.config.js`.
+**Adding another site later (Etsy, Grailed):** copy the `depop` folder, change the config and `map.js`, and add one line to `index.js` and `sources.config.js`.

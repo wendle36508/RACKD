@@ -9,6 +9,7 @@ Tanner (founder) is non-technical. Explain changes in plain language and keep st
 - No Poshmark data in this repo (Tanner's decision).
 - Scraping with Apify is Tanner's decision; don't argue it. Proxy stays Apify Residential.
 - Scraping is per user, on app open (2-freshness/on-open.js): max once an hour, 2 refreshes a day, sizes per plan in 7-money/plans.config.js. Every Apify call must go through `runPaid` (spend guard). No timers or cron jobs.
+- Never show a user the same card twice: every card on screen is saved in `user.shown` and `deckFor` leaves it out. A refresh's own finds (`user.lastRefresh.ids`) go to the front of the deck.
 - Log anything that fires with `activity()` and anything Tanner must know with `alert()` (toolbox/alerts.js). Tanner wants nothing to happen, or fail to happen, silently.
 - Run `npm run check` before committing.
 - Tanner runs on Windows: keep `RACKD.bat` working and paths Windows-friendly.

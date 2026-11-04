@@ -2,11 +2,12 @@
 // folder like 1-sources/depop/ with the same two jobs, add it here and to sources.config.js.
 import * as depop from './depop/index.js';
 import * as vinted from './vinted/index.js';
+import * as ebay from './ebay/index.js';
 import { SOURCE_SETTINGS } from './sources.config.js';
 
-const ALL = { depop, vinted };
+const ALL = { depop, vinted, ebay };
 
-/** The sources switched on in .env (SOURCES=depop,vinted). */
+/** The sources switched on in .env (SOURCES=vinted,depop,ebay). */
 export function enabledSources() {
   const names = (process.env.SOURCES || 'depop').split(',').map(s => s.trim()).filter(Boolean);
   return names.map(n => {

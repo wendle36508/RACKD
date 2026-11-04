@@ -43,21 +43,27 @@ export function profileOf(user, byId, fingerprints = { items: {} }) {
   return { likes: liked.length, w, median: pick(0.5), low: pick(0.2), high: pick(0.8), taste };
 }
 
-/** What to search for on each site, for this user. */
-export function searchFor(P) {
+/**
+ * What to search for on each site, for this user. `rotation` counts their refreshes, so
+ * each refresh asks for a different slice of their style and fewer repeats come back.
+ */
+export function searchFor(P, rotation = 0) {
+  const slice = (pool, n) => [...new Set(Array.from({ length: Math.min(n, pool.length) }, (_, i) => pool[(rotation * n + i) % pool.length]))];
   if (P.likes < TASTE.likesBeforePersonal) {
-    return { queries: TASTE.starterSearches, brands: [], size: null, minPrice: null, maxPrice: null, personal: false };
+    return { queries: slice(TASTE.starterSearches, 4), brands: [], size: null, minPrice: null, maxPrice: null, personal: false };
   }
-  const brands = top(P.w.brand, 3), styles = top(P.w.style, 2), cats = top(P.w.cat, 2);
-  const queries = [...new Set([
-    ...brands.slice(0, 2),
-    ...styles.map((s, i) => (cats[i] ? `${s} ${cats[i]}` : s)),
-    TASTE.starterSearches[Math.floor(Math.random() * TASTE.starterSearches.length)], // a little exploring
-  ].filter(Boolean).map(q => q.toLowerCase()))].slice(0, 4);
+  const brands = top(P.w.brand, 4), styles = top(P.w.style, 3), cats = top(P.w.cat, 2);
+  const pool = [...new Set([
+    ...brands,
+    ...styles.map((s, i) => (cats.length ? `${s} ${cats[i % cats.length]}` : s)),
+    ...styles,
+  ].filter(Boolean).map(q => q.toLowerCase()))];
+  const explore = TASTE.starterSearches[rotation % TASTE.starterSearches.length].toLowerCase(); // a little exploring
+  const queries = [...new Set([...slice(pool, 3), explore])];
   const sizes = Object.entries(P.w.size).sort((a, b) => b[1] - a[1]);
   return {
     queries,
-    brands,
+    brands: brands.slice(0, 3),
     size: sizes[0] && sizes[0][1] >= 2 ? sizes[0][0] : null,
     minPrice: P.low != null ? Math.floor(P.low * 0.7) : null,
     maxPrice: P.high != null ? Math.ceil(P.high * 1.3) : null,

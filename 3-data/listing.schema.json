@@ -27,6 +27,7 @@
     "status":            { "type": "string", "enum": ["active", "sold", "removed"], "description": "Only active items are shown in the app" },
     "missedChecks":      { "type": "integer", "default": 0, "description": "How many re-checks in a row could not find the item. At 2, it is marked removed" },
     "scrapedFor":        { "type": ["string", "null"], "description": "The user whose style search found this item. Other users only see it if it is a strong match for them" },
+    "foundFor":          { "type": "array", "items": { "type": "string" }, "description": "Every user whose own refresh found this item. It counts as theirs, not as a shared listing" },
     "firstSeenAt":       { "type": "string", "format": "date-time" },
     "lastCheckedAt":     { "type": "string", "format": "date-time", "description": "Last time RACKD confirmed it is still for sale. Checked again just before showing if older than the stale limit" },
     "soldAt":            { "type": ["string", "null"], "format": "date-time" }

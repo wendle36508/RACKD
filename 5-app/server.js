@@ -2,8 +2,8 @@
 // open http://localhost:3000.
 //
 // What happens when someone opens the app:
-//   1. They instantly get a deck of stored listings that fit their style and were
-//      confirmed for sale recently (nothing is shown that might already be sold).
+//   1. They instantly get a deck of stored listings that fit their style, were confirmed
+//      for sale recently, and that they have NEVER been shown (no card ever comes back).
 //   2. In the background: listings they're about to see that haven't been checked lately
 //      are re-checked (floor 2), then a new scrape picked for their style runs, unless
 //      they already had one in the last hour, hit today's cap, or the budget is used up.
@@ -14,9 +14,9 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { ROOT, logger } from '../toolbox/env.js';
-import { loadListings, loadFingerprints, getUser, saveUser } from '../3-data/store.js';
+import { loadListings, loadFingerprints, getUser, saveUser, markShown } from '../3-data/store.js';
 import { deckFor } from '../4-algorithm/deck.js';
-import { refreshForUser, scrapeDecision, isRunning } from '../2-freshness/on-open.js';
+import { refreshForUser, scrapeDecision, isRunning, nextRefresh } from '../2-freshness/on-open.js';
 import { checkStale, isFresh } from '../2-freshness/check-before-show.js';
 import { planFor } from '../7-money/plans.config.js';
 import { spentThisMonth } from '../7-money/spend-guard.js';
@@ -73,8 +73,9 @@ function startOpenJob(uid) {
   const job = (async () => {
     const user = getUser(uid);
     const { items } = deckFor(user, loadListings(), loadFingerprints(), { limit: 60 });
-    await checkStale(items);                      // sold check, just before showing
-    const r = await refreshForUser(uid);          // new scrape for their style (if allowed)
+    // Both at once: the sold check on their next cards, and the new scrape for their style
+    // (if they have a refresh). Starting the refresh straight away gets new finds in sooner.
+    const [, r] = await Promise.all([checkStale(items), refreshForUser(uid)]);
     if (r.added) runStyleAi();
     return r;
   })().catch(e => { log(`open job for ${uid}: ${e.message}`); return { error: e.message }; })
@@ -100,16 +101,25 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/open') {
       const d = scrapeDecision(getUser(uid));
       activity('app-open', { user: uid, willRefresh: d.ok, reason: d.ok ? null : d.reason });
-      startOpenJob(uid);
-      return send(res, 200, { scraping: d.ok, reason: d.ok ? null : d.reason, nextAt: d.nextAt || null });
+      startOpenJob(uid);   // uses up the refresh right away, so "next" below is after this one
+      return send(res, 200, { scraping: d.ok, reason: d.ok ? null : d.reason, next: nextRefresh(getUser(uid)) });
     }
 
     if (req.method === 'POST' && url.pathname === '/api/more') {
       const { known = [] } = await readBody(req);
       const have = new Set(known);
-      const { items } = deckFor(getUser(uid), loadListings(), loadFingerprints(), { limit: 150, freshOnly: l => isFresh(l) });
+      const u = getUser(uid);
+      const fromRefresh = new Set(u.lastRefresh?.ids || []);   // this refresh's finds go to the front
+      const { items } = deckFor(u, loadListings(), loadFingerprints(), { limit: 150, freshOnly: l => isFresh(l) });
       const fresh = items.filter(l => !have.has(l.id)).slice(0, 50);
-      return send(res, 200, { cards: fresh.map(toCard), running: jobs.has(uid) || isRunning(uid) });
+      return send(res, 200, { cards: fresh.map(l => ({ ...toCard(l), nw: fromRefresh.has(l.id) ? 1 : 0 })), running: jobs.has(uid) || isRunning(uid) });
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/shown') {
+      // The app reports each card the moment it's on screen. Those never come back.
+      const { ids = [] } = await readBody(req);
+      if (Array.isArray(ids) && ids.length) markShown(uid, ids.slice(0, 200));
+      return send(res, 200, { ok: true });
     }
 
     if (req.method === 'POST' && url.pathname === '/api/swipe') {

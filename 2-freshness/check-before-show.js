@@ -30,7 +30,8 @@ export async function checkStale(listings, now = new Date()) {
         else if (a === 'active') { l.missedChecks = 0; ok++; }
         else if (++l.missedChecks >= FRESHNESS.missesBeforeRemoved) { l.status = 'removed'; removed++; }
       }
-      updateListings(items);
+      // save only the fields the check changed, so nothing else (like who found it) is overwritten
+      updateListings(items.map(({ id, status, soldAt, missedChecks, lastCheckedAt }) => ({ id, status, soldAt, missedChecks, lastCheckedAt })));
     } catch (e) {
       log(`${items[0].source}: ${e.message}. Those listings stay hidden until they can be checked.`);
       activity('sold-check-failed', { source: items[0].source, count: items.length, error: e.message });

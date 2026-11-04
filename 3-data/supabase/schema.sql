@@ -29,6 +29,8 @@ create table if not exists listings (
   first_seen_at       timestamptz not null default now(),
   last_checked_at     timestamptz not null default now(),
   sold_at             timestamptz,
+  scraped_for         text,                          -- first user whose search found it
+  found_for           text[] default '{}',           -- every user whose search found it
   fingerprint         vector(512)                    -- FashionCLIP style fingerprint
 );
 

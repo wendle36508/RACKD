@@ -1,9 +1,11 @@
-// Which sites RACKD scrapes, what each costs on Apify, and how each scrape is split.
-// "share" is the slice of each scrape that goes to that site (they're rebalanced over the
-// sites switched on in .env SOURCES, so Depop alone gets everything).
+// Which sites RACKD scrapes, what each costs on Apify, and how each refresh is split.
+// "share" is the slice of every refresh that goes to that site (Tanner's mix, 4 Nov 2026).
+// Shares are rebalanced over the sites switched on in .env SOURCES, so if only Depop is
+// on, Depop gets the whole refresh.
 export const SOURCE_SETTINGS = {
-  depop:  { usdPer1000: 4.00, share: 0.5 },   // Apify prices as of 4 Nov 2026
-  vinted: { usdPer1000: 1.00, share: 0.5 },
+  vinted: { usdPer1000: 1.00, share: 0.50 },   // Apify price, 4 Nov 2026
+  depop:  { usdPer1000: 4.00, share: 0.30 },   // Apify price, 4 Nov 2026
+  ebay:   { usdPer1000: 4.00, share: 0.20 },   // Apify price, 4 Nov 2026 (eBay actor not chosen yet)
 };
 
 // Residential proxy data may be billed by Apify on top of the listing price. If it is,

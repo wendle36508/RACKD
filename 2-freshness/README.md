@@ -4,7 +4,7 @@ Keeps every deck fresh, per user, and makes sure nobody falls for an item that a
 
 | File | What it does |
 |---|---|
-| `on-open.js` | **Refresh on open.** When a user opens the app, scrape new listings picked for their style. At most once an hour, 2 times a day (free 50 each, premium 150 each). Skipped if the monthly budget is used up |
+| `on-open.js` | **Refresh on open.** When a user opens the app, scrape new listings picked for their style. At most once an hour, 2 times a day (free 50 each, premium 150 each; the day resets at midnight US Eastern). Each refresh searches a different slice of their style, so fewer repeats come back. Skipped if the monthly budget is used up |
 | `check-before-show.js` | **Sold check, just before showing.** Any card not confirmed for sale in the last 24 hours is re-checked before it appears. Sold ones are hidden for good; ones that vanish twice in a row are taken down |
 | `cleanup.js` | Deletes sold listings older than 30 days. Free (no scraping): `npm run cleanup` |
 | `freshness.config.js` | The numbers: 60-minute gap, 24-hour re-check, how many cards to check per open |

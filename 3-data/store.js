@@ -33,19 +33,58 @@ export function addNew(incoming, limit = Infinity) {
   return fresh;
 }
 
-/** Saves changes to existing listings (matched by id). */
+/** Saves changes to existing listings (matched by id). Only the fields passed are changed. */
 export function updateListings(changed) {
   if (!changed.length) return;
   const byId = new Map(changed.map(l => [l.id, l]));
-  saveListings(loadListings().map(l => byId.get(l.id) || l));
+  saveListings(loadListings().map(l => (byId.has(l.id) ? { ...l, ...byId.get(l.id) } : l)));
+}
+
+/**
+ * Saves what one user's refresh found. New listings are added. Ones already stored (because
+ * someone else's search found them first) are marked as found for this user too, and as
+ * confirmed for sale just now. Returns { added, ids } (ids = everything this refresh found).
+ */
+export function upsertFound(found, userId, nowIso = new Date().toISOString()) {
+  const all = loadListings();
+  const at = new Map(all.map((l, i) => [l.id, i]));
+  const ids = new Set();
+  let added = 0;
+  for (const f of found) {
+    if (!f || ids.has(f.id)) continue;
+    ids.add(f.id);
+    const i = at.get(f.id);
+    if (i === undefined) {
+      all.push({ ...f, scrapedFor: userId, foundFor: [userId] });
+      at.set(f.id, all.length - 1);
+      added++;
+    } else {
+      const l = all[i];
+      all[i] = { ...l, price: f.price ?? l.price, status: 'active', missedChecks: 0, soldAt: null, lastCheckedAt: nowIso,
+        foundFor: [...new Set([...(l.foundFor || (l.scrapedFor ? [l.scrapedFor] : [])), userId])] };
+    }
+  }
+  saveListings(all);
+  return { added, ids: [...ids] };
 }
 
 // ---------- users ----------
 // A user: { id, plan: 'free'|'premium', createdAt, lastScrapeAt, day: { date, count, refreshes },
-//           liked: [listing ids], passed: [listing ids] }
+//           liked: [ids], passed: [ids], shown: [ids of every card they've had on screen],
+//           lastRefresh: { at, ids }, searchCursor }
 export function getUser(id) {
   const all = readJson(file('users.json'), {});
-  return all[id] || { id, plan: 'free', createdAt: new Date().toISOString(), lastScrapeAt: null, day: { date: null, count: 0, refreshes: 0 }, liked: [], passed: [] };
+  return all[id] || { id, plan: 'free', createdAt: new Date().toISOString(), lastScrapeAt: null, day: { date: null, count: 0, refreshes: 0 },
+    liked: [], passed: [], shown: [], lastRefresh: { at: null, ids: [] }, searchCursor: 0 };
+}
+
+/** Remembers cards a user has had on screen, so they never come back. Keeps the latest 20,000. */
+export function markShown(userId, ids) {
+  const u = getUser(userId);
+  const have = new Set(u.shown || []);
+  for (const id of ids) if (typeof id === 'string' && id.length < 200) have.add(id);
+  u.shown = [...have].slice(-20000);
+  saveUser(u);
 }
 export function saveUser(u) {
   const all = readJson(file('users.json'), {});

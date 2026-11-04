@@ -8,7 +8,7 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
 
 | Floor | Folder | What it does | Status today |
 |---|---|---|---|
-| 1. Listing sources | [`1-sources/`](1-sources/) | Scrapes Depop and Vinted through Apify, with Apify's Residential proxy | Ready for your Apify token and scrapers |
+| 1. Listing sources | [`1-sources/`](1-sources/) | Scrapes Vinted, Depop and eBay through Apify, with Apify's Residential proxy | Ready for your Apify token and scrapers |
 | 2. Freshness | [`2-freshness/`](2-freshness/) | Refresh on open: new listings for each user's style, at most once an hour, 2 times a day. Checks for sold items just before showing | Built, waiting for the scrapers |
 | 3. Data storage | [`3-data/`](3-data/) | Listings, users and spending, all in one standard shape. Files on your laptop now, a cloud database later | Local storage works; cloud database not built |
 | 4. Algorithm | [`4-algorithm/`](4-algorithm/) | Reads each user's style from their swipes, builds their searches, ranks their deck, decides what can be shared. FashionCLIP reads the photos | Built, waiting for real listings |
@@ -23,8 +23,9 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
 ```
  User opens RACKD
         |
- [5 APP]       Straight away: shows stored listings that fit their style and were
-        |      confirmed for sale in the last 24 hours. No waiting.
+ [5 APP]       Straight away: shows stored listings that fit their style, were
+        |      confirmed for sale in the last 24 hours, and that they have NEVER
+        |      been shown before. No waiting.
         |
         |      Meanwhile, in the background:
         v
@@ -38,17 +39,19 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
         v
  [7 MONEY]     Spend guard: is there room in this month's $330 budget? If not, skip.
         v
- [1 SOURCES]   Apify scrapes Depop and Vinted (split 50/50) through the Residential
+ [1 SOURCES]   Apify scrapes Vinted 50%, Depop 30%, eBay 20%, through the Residential
         |      proxy. Free = 50 listings per refresh, premium = 150.
         v
  [3 DATA]      New listings saved, tagged with whose search found them.
         v
- [5 APP]       New finds slide into the user's deck within a minute or two.
+ [5 APP]       The new finds jump to the FRONT of their deck within a minute or two.
 ```
+
+**Never the same card twice:** the moment a card is on someone's screen, RACKD remembers it, and it never comes back, whether they swiped it or not. So when someone opens the app with a refresh, nothing they see is a repeat. While the refresh loads, they only get listings they've never seen (or a "finding fresh pieces for you" screen), and the new finds go straight to the front as soon as they land. Each refresh also searches a different slice of their style, so fewer repeats come back from the sites in the first place. If they run out, the app says when their next refresh is ("at 3:40 PM" or "tomorrow"). The 2-a-day limit resets at midnight US Eastern time.
 
 **Light sharing:** a listing found for one user can show up for someone else only if the algorithm rates it a strong match for *their* style, and at most 20% of anyone's deck comes from other people's searches. Brand-new users don't get shared listings until RACKD knows their style.
 
-**The important idea:** each floor only talks to the floor next to it through one small file. When you hand over the final scrapers, only `1-sources/depop/` and `1-sources/vinted/` change. When we move to a cloud database, only `3-data/store.js` changes.
+**The important idea:** each floor only talks to the floor next to it through one small file. When you hand over the final scrapers, only `1-sources/depop/`, `1-sources/vinted/` and `1-sources/ebay/` change. When we move to a cloud database, only `3-data/store.js` changes.
 
 ## The numbers, and where to change them
 
@@ -58,22 +61,22 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
 | Listings per refresh | free 50, premium 150 | `7-money/plans.config.js` |
 | Minimum gap between refreshes | 60 minutes | `2-freshness/freshness.config.js` |
 | Re-check before showing if older than | 24 hours | `2-freshness/freshness.config.js` |
-| Depop / Vinted split | 50 / 50 | `1-sources/sources.config.js` |
+| Site split | Vinted 50%, Depop 30%, eBay 20% | `1-sources/sources.config.js` |
 | Monthly Apify budget | $330 | `.env` (MONTHLY_BUDGET_USD) |
 | Sharing: how strong a match, how much of a deck | 0.6, 20% | `4-algorithm/taste.config.js` |
 
 ## What it costs
 
-Apify prices: **Depop $4 per 1,000 listings, Vinted $1 per 1,000.** With a 50/50 mix that averages $2.50 per 1,000.
+Apify prices: **Vinted $1, Depop $4 and eBay $4 per 1,000 listings.** With your 50/30/20 mix that averages **$2.50 per 1,000**.
 
-| Per user, if they use every refresh | Listings a month | Depop only | 50/50 mix | Vinted only |
-|---|---|---|---|---|
-| Free (100 a day) | 3,000 | $12.00 | $7.50 | $3.00 |
-| Premium (300 a day) | 9,000 | $36.00 | $22.50 | $9.00 |
+| Per user, if they use every refresh | Listings a month | Cost a month |
+|---|---|---|
+| Free (100 a day) | 3,000 | $7.50 |
+| Premium (300 a day) | 9,000 | $22.50 |
 
 Sold-item checks cost the same per listing and come on top (they only happen for cards that haven't been checked in 24 hours). Residential proxy data may also be billed on top. Put it in `.env` as `PROXY_USD_PER_1000` once you know it. **The spend guard counts all of it and stops scraping when the month's $330 is used.** Users still see their stored matches.
 
-With $330 a month, that's roughly 44 free users who max out every day on the 50/50 mix (27 on Depop only). Most people won't open the app twice every day, and shared listings cut the cost, so the real number is higher. Check `logs/spend.log` or open `http://localhost:3000/api/status` to see this month's spend.
+With $330 a month, that's roughly 44 free users who max out every day. Most people won't open the app twice every day, and shared listings cut the cost, so the real number is higher. Check `logs/spend.log` or open `http://localhost:3000/api/status` to see this month's spend.
 
 ## Safety rails: nothing fires (or fails) without you knowing
 
