@@ -1,0 +1,145 @@
+<title>RACKD Build Tower</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one building drawn as stacked floors, foundation (listing sources) at the bottom, roof on top, toolbox shed beside the ground floor. */
+:root {
+  --bg: #eef0f4;
+  --fg: #1d2230;
+  --muted: #5d6578;
+  --wall: #ffffff;
+  --wall-edge: #c9cfdb;
+  --floor-tag: #2c3550;
+  --ground: #8a7f6b;
+  --green: #1f9d55;
+  --amber: #e08a00;
+  --red: #d33a2c;
+  --grey: #a3a9b6;
+  --glow: 0.35;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151d; --fg: #e7eaf1; --muted: #9aa2b4; --wall: #1c212c; --wall-edge: #333b4c;
+    --floor-tag: #3a4566; --ground: #6b6252; --grey: #5c6374; --glow: 0.55; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12151d; --fg: #e7eaf1; --muted: #9aa2b4; --wall: #1c212c; --wall-edge: #333b4c;
+  --floor-tag: #3a4566; --ground: #6b6252; --grey: #5c6374; --glow: 0.55; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+.page { max-width: 760px; margin: 0 auto; padding-block: 28px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 20px; }
+header h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.85rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.light { width: 12px; height: 12px; border-radius: 50%; flex: none; background: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) calc(var(--glow) * 100%), transparent); }
+.g { --c: var(--green); } .a { --c: var(--amber); } .r { --c: var(--red); } .x { --c: var(--grey); box-shadow: none; }
+
+.site { display: grid; grid-template-columns: 1fr; gap: 0; }
+.roof { height: 28px; margin: 0 6%; background: var(--floor-tag); clip-path: polygon(4% 100%, 50% 0, 96% 100%); }
+.tower { border: 2px solid var(--wall-edge); border-bottom: none; background: var(--wall); }
+.floor { display: grid; grid-template-columns: 112px 1fr; border-bottom: 2px solid var(--wall-edge); }
+.tag { background: var(--floor-tag); color: #fff; padding: 12px 10px; display: flex; flex-direction: column; justify-content: center; }
+.tag b { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em; opacity: 0.75; }
+.tag strong { font-family: var(--display); font-weight: 600; font-size: 1rem; line-height: 1.15; }
+.windows { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; padding: 10px; min-width: 0; }
+.win { display: flex; gap: 10px; align-items: flex-start; padding: 9px 10px; border: 1px solid var(--wall-edge); border-radius: 4px; min-width: 0; }
+.win .light { margin-top: 4px; }
+.win div { min-width: 0; }
+.win strong { display: block; font-weight: 600; font-size: 0.92rem; }
+.win small { display: block; color: var(--muted); font-size: 0.8rem; }
+.ground { height: 14px; background: var(--ground); border-radius: 0 0 4px 4px; }
+.shed { display: grid; grid-template-columns: 112px 1fr; border: 2px dashed var(--wall-edge); background: var(--wall); margin-top: 18px; }
+.shed .tag { background: var(--ground); }
+footer { font-size: 0.82rem; color: var(--muted); }
+@media (max-width: 480px) {
+  .floor, .shed { grid-template-columns: 1fr; }
+  .tag { flex-direction: row; gap: 8px; align-items: baseline; padding: 8px 10px; }
+}
+</style>
+
+<div class="page">
+  <header>
+    <h1>RACKD build tower</h1>
+    <p>Every part of the build, floor by floor. Updated 4 Nov 2026.</p>
+  </header>
+
+  <div class="legend" aria-label="Light key">
+    <span><i class="light g"></i>Working</span>
+    <span><i class="light a"></i>Waiting</span>
+    <span><i class="light r"></i>Broken or blocked</span>
+    <span><i class="light x"></i>Not built yet</span>
+  </div>
+
+  <div class="site">
+    <div class="roof" aria-hidden="true"></div>
+    <div class="tower">
+      <section class="floor">
+        <div class="tag"><b>FLOOR 7</b><strong>Money</strong></div>
+        <div class="windows">
+          <div class="win"><i class="light x"></i><div><strong>Subscription ($5/mo for 400 new swipes/hr, free gets 50/hr)</strong><small>Planned, not built</small></div></div>
+          <div class="win"><i class="light a"></i><div><strong>eBay Ambassador links</strong><small>Joined, links not live in the app yet</small></div></div>
+          <div class="win"><i class="light x"></i><div><strong>Etsy affiliate</strong><small>Not set up</small></div></div>
+          <div class="win"><i class="light x"></i><div><strong>In-app browser</strong><small>Not built</small></div></div>
+        </div>
+      </section>
+      <section class="floor">
+        <div class="tag"><b>FLOOR 6</b><strong>Hosting</strong></div>
+        <div class="windows">
+          <div class="win"><i class="light x"></i><div><strong>Vercel deploy</strong><small>On hold until real listings</small></div></div>
+        </div>
+      </section>
+      <section class="floor">
+        <div class="tag"><b>FLOOR 5</b><strong>App</strong></div>
+        <div class="windows">
+          <div class="win"><i class="light a"></i><div><strong>Swipe prototype</strong><small>Built, waiting for a real listing source</small></div></div>
+        </div>
+      </section>
+      <section class="floor">
+        <div class="tag"><b>FLOOR 4</b><strong>Algorithm</strong></div>
+        <div class="windows">
+          <div class="win"><i class="light a"></i><div><strong>FashionCLIP style AI</strong><small>Built, waiting for real listings</small></div></div>
+        </div>
+      </section>
+      <section class="floor">
+        <div class="tag"><b>FLOOR 3</b><strong>Data storage</strong></div>
+        <div class="windows">
+          <div class="win"><i class="light x"></i><div><strong>Listing spreadsheets</strong><small>None yet</small></div></div>
+          <div class="win"><i class="light x"></i><div><strong>Cloud database</strong><small>Not built</small></div></div>
+        </div>
+      </section>
+      <section class="floor">
+        <div class="tag"><b>FLOOR 2</b><strong>Freshness</strong></div>
+        <div class="windows">
+          <div class="win"><i class="light x"></i><div><strong>Scheduled re-scrape</strong><small>Not built</small></div></div>
+          <div class="win"><i class="light x"></i><div><strong>Sold-item removal</strong><small>Not built</small></div></div>
+        </div>
+      </section>
+      <section class="floor">
+        <div class="tag"><b>FLOOR 1</b><strong>Listing sources</strong></div>
+        <div class="windows">
+          <div class="win"><i class="light x"></i><div><strong>Poshmark collector</strong><small>Test only, archived</small></div></div>
+          <div class="win"><i class="light x"></i><div><strong>Apify / Depop</strong><small>Paused</small></div></div>
+          <div class="win"><i class="light a"></i><div><strong>Etsy API</strong><small>Applied, pending approval</small></div></div>
+          <div class="win"><i class="light r"></i><div><strong>eBay API</strong><small>Account suspended</small></div></div>
+        </div>
+      </section>
+    </div>
+    <div class="ground" aria-hidden="true"></div>
+
+    <section class="shed">
+      <div class="tag"><b>SHED</b><strong>Toolbox</strong></div>
+      <div class="windows">
+        <div class="win"><i class="light g"></i><div><strong>gstack</strong><small>Installed in Claude Code on your laptop</small></div></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>Bookmark this page. It gets updated whenever a part changes status.</footer>
+</div>

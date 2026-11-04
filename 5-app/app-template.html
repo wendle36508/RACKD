@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14152a">
+<title>RACKD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: one-screen phone app; header, card stack, action bar. Tabs swap the middle. */
+:root{
+  --bg:#f2f1f7; --surface:#ffffff; --ink:#14152a; --muted:#6b6d85; --line:#e2e1ec;
+  --accent:#5b3df5; --like:#0f9f6e; --nope:#e5484d; --tag:#ffd84d;
+  --display:"Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --body:"DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1020; --surface:#1b1c33; --ink:#f1f0fa; --muted:#a3a4bf; --line:#2c2d4a;
+  --accent:#8b74ff; --like:#2fd39a; --nope:#ff6b70; --tag:#ffd84d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1020; --surface:#1b1c33; --ink:#f1f0fa; --muted:#a3a4bf; --line:#2c2d4a;
+  --accent:#8b74ff; --like:#2fd39a; --nope:#ff6b70; --tag:#ffd84d; color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.4 var(--body);overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+.app{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;
+  padding-top:max(10px, env(safe-area-inset-top,0px));padding-bottom:max(12px, env(safe-area-inset-bottom,0px));
+  padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));gap:10px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font:800 26px/1 var(--display);letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+nav{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+nav button{border:0;background:none;color:var(--muted);font:600 13px var(--body);padding:7px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
+nav button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+nav .count{font-variant-numeric:tabular-nums}
+main{flex:1;min-height:0;position:relative}
+.view{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px}
+/* deck */
+.deck{flex:1;min-height:0;position:relative}
+.card{position:absolute;inset:0;background:var(--surface);border-radius:22px;overflow:hidden;
+  box-shadow:0 10px 30px rgba(20,21,42,.16);touch-action:none;user-select:none;cursor:grab;will-change:transform}
+.card.back{transform:scale(.95) translateY(10px);filter:brightness(.97)}
+.card .ph{position:absolute;inset:0;background:linear-gradient(140deg,var(--accent),#1c1d3a);display:flex;align-items:center;justify-content:center}
+.card .ph b{font:800 34px var(--display);color:#fff;opacity:.5;text-align:center;padding:20px}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.card .shade{position:absolute;inset:auto 0 0 0;height:58%;background:linear-gradient(to top,rgba(8,8,20,.92),rgba(8,8,20,.55) 55%,transparent)}
+.card .info{position:absolute;left:0;right:0;bottom:0;padding:18px;color:#fff;display:flex;flex-direction:column;gap:6px}
+.pricetag{position:absolute;top:16px;right:16px;background:var(--tag);color:#14152a;font:800 20px/1 var(--display);
+  padding:9px 12px 9px 18px;border-radius:6px 10px 10px 6px;clip-path:polygon(10px 0,100% 0,100% 100%,10px 100%,0 50%);font-variant-numeric:tabular-nums}
+.pricetag s{font:500 12px var(--body);opacity:.65;margin-left:4px}
+.brand{font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.title{font:800 22px/1.15 var(--display);text-wrap:balance;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:600 12px var(--body);padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(6px)}
+.why{font:500 13px var(--body);color:var(--tag)}
+.stamp{position:absolute;top:28px;font:800 34px/1 var(--display);padding:6px 12px;border:4px solid;border-radius:10px;opacity:0;letter-spacing:.04em}
+.stamp.like{left:22px;color:var(--like);transform:rotate(-14deg)}
+.stamp.nope{right:22px;color:var(--nope);transform:rotate(14deg);top:80px}
+.actions{display:flex;justify-content:center;align-items:center;gap:18px}
+.btn{width:64px;height:64px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 4px 14px rgba(20,21,42,.10);transition:transform .12s}
+.btn:active{transform:scale(.92)}
+.btn.small{width:46px;height:46px}
+.btn svg{width:28px;height:28px}
+.btn.small svg{width:20px;height:20px}
+.btn:focus-visible,nav button:focus-visible,a:focus-visible,.linkbtn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:20px}
+.empty h2{font:800 26px var(--display);margin:0}
+/* style + liked */
+.scroll{overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:14px;padding-bottom:8px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.panel h2{font:800 22px/1.15 var(--display);margin:0;text-wrap:balance}
+.panel h3{font:700 12px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0}
+.muted{color:var(--muted)}
+.bar{display:grid;grid-template-columns:96px 1fr 34px;align-items:center;gap:10px;font-size:14px}
+.bar .track{height:10px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:6px}
+.bar .n{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.big{font:800 30px/1 var(--display);font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.item .thumb{aspect-ratio:1/1;max-width:100%;position:relative;background:linear-gradient(140deg,var(--accent),#1c1d3a)}
+.item .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.item .body{padding:10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.item .t{font-weight:600;font-size:13px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item .p{font:800 17px var(--display);font-variant-numeric:tabular-nums}
+.item a{margin-top:auto;display:block;text-align:center;background:var(--ink);color:var(--bg);text-decoration:none;font:700 13px var(--body);padding:9px;border-radius:10px}
+.linkbtn{background:none;border:1px solid var(--line);color:var(--muted);font:600 13px var(--body);padding:8px 12px;border-radius:10px;cursor:pointer}
+.toast{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translate(-50%,-10px);background:var(--ink);color:var(--bg);
+  padding:10px 16px;border-radius:999px;font:600 14px var(--body);opacity:0;transition:.25s;pointer-events:none;max-width:calc(100% - 32px);text-align:center;z-index:20}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.pill{font:600 13px var(--body);padding:6px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
+.engine{font:700 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.foot{font-size:11px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div><div class="logo">RACK<span>D</span></div><div class="engine" id="engine"></div></div>
+    <nav role="tablist">
+      <button role="tab" id="tab-swipe" aria-selected="true">Swipe</button>
+      <button role="tab" id="tab-style" aria-selected="false">Your style</button>
+      <button role="tab" id="tab-liked" aria-selected="false">Liked <span class="count" id="likedCount">0</span></button>
+    </nav>
+  </header>
+  <main>
+    <section class="view" id="view-swipe">
+      <div class="deck" id="deck"></div>
+      <div class="actions">
+        <button class="btn small" id="undoBtn" aria-label="Undo last swipe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+        <button class="btn" id="nopeBtn" aria-label="Pass"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" style="color:var(--nope)"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <button class="btn" id="likeBtn" aria-label="Like"><svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--like)"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3.2 4.5 6.9 4.5c2.1 0 3.6 1.1 5.1 3 1.5-1.9 3-3 5.1-3 3.7 0 6 3.7 4.5 7.2C19.5 16.4 12 21 12 21z"/></svg></button>
+        <button class="btn small" id="infoBtn" aria-label="Open this listing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></button>
+      </div>
+    </section>
+    <section class="view" id="view-style" hidden><div class="scroll" id="styleBox"></div></section>
+    <section class="view" id="view-liked" hidden><div class="scroll" id="likedBox"></div></section>
+  </main>
+  <div class="foot">__FOOT__</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const DATA = __DATA__;
+const VEC = __VEC__;
+const items = DATA.map((d,i)=>({...d,id:i}));
+// ---------- FashionCLIP fingerprints ----------
+// Each photo was turned into 512 numbers by FashionCLIP. Similar-looking items have similar numbers.
+const unpack=s=>{if(!s)return null;const b=atob(s);const v=new Float32Array(b.length);let n=0;
+  for(let i=0;i<b.length;i++){let x=b.charCodeAt(i);if(x>127)x-=256;v[i]=x;n+=x*x;}n=Math.sqrt(n)||1;for(let i=0;i<v.length;i++)v[i]/=n;return v;};
+const AI = !!(VEC&&VEC.items);
+if(AI){ items.forEach((it,i)=>it.v=unpack(VEC.items[i])); }
+const LABELS = AI? {vibe:Object.entries(VEC.vibes).map(([k,s])=>[k,unpack(s)]), color:Object.entries(VEC.colors).map(([k,s])=>[k,unpack(s)])} : null;
+const dot=(a,b)=>{let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s;};
+// How strongly each style word fits the average item, so we can show what is special about YOUR likes.
+const labelBase = AI? (()=>{const r={};const withV=items.filter(i=>i.v);['vibe','color'].forEach(g=>LABELS[g].forEach(([k,v])=>{r[k]=withV.reduce((s,i)=>s+dot(i.v,v),0)/withV.length;}));return r;})() : null;
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cap = s=>s? s.charAt(0).toUpperCase()+s.slice(1):'';
+const shortCat = c=>(c||'').replace(/^(Women|Men|Kids) /,'').replace(' & Jumpsuits','');
+const KEY='rackd-demo-v1';
+let state = {seen:[], liked:[], passed:[], history:[]};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&Array.isArray(s.seen)) state=s;}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+
+// ---------- taste model ----------
+// Each like adds weight to that brand, style and category; a pass takes a little away.
+// Price: we learn the typical price of liked items and favour listings near it.
+function profile(){
+  const w={brand:{},style:{},cat:{}}; const prices=[];
+  const add=(it,v)=>{w.brand[it.b]=(w.brand[it.b]||0)+v; if(it.st) w.style[it.st]=(w.style[it.st]||0)+v; w.cat[shortCat(it.c)]=(w.cat[shortCat(it.c)]||0)+v;};
+  state.liked.forEach(id=>{add(items[id],1); prices.push(items[id].pr)});
+  state.passed.forEach(id=>add(items[id],-0.4));
+  prices.sort((a,b)=>a-b);
+  const med = prices.length? prices[Math.floor(prices.length/2)] : null;
+  let taste=null;
+  if(AI && state.liked.length){
+    // taste = average look of what you liked, minus a bit of what you passed on
+    taste=new Float32Array(512);
+    const addV=(id,k)=>{const v=items[id].v;if(v)for(let i=0;i<512;i++)taste[i]+=k*v[i];};
+    state.liked.forEach(id=>addV(id,1/state.liked.length));
+    if(state.passed.length) state.passed.forEach(id=>addV(id,-0.35/state.passed.length));
+    let n=Math.sqrt(dot(taste,taste))||1; for(let i=0;i<512;i++)taste[i]/=n;
+  }
+  return {w,prices,med,taste};
+}
+function score(it,P){
+  if(P.taste && it.v){
+    let s=12*dot(it.v,P.taste)+0.25*(P.w.brand[it.b]||0);
+    if(P.med){const r=Math.log(it.pr/P.med); s+=1.0*Math.exp(-r*r/0.5);}
+    return s;
+  }
+  let s=(P.w.brand[it.b]||0)*1.0+(P.w.style[it.st]||0)*1.2+(P.w.cat[shortCat(it.c)]||0)*0.6;
+  if(P.med){const r=Math.log(it.pr/P.med); s+=1.5*Math.exp(-r*r/0.5);}
+  return s;
+}
+function reasons(it,P){
+  if(state.liked.length<3) return '';
+  if(P.taste && it.v){
+    let best=null,bs=0; state.liked.forEach(id=>{const v=items[id].v;if(!v)return;const s=dot(v,it.v);if(s>bs){bs=s;best=items[id];}});
+    const vib=topLabels(it.v,'vibe',1)[0];
+    if(best&&bs>0.75) return 'Looks like the '+best.t.split(' ').slice(0,5).join(' ')+' you liked';
+    if(vib) return 'Picked for you: '+cap(vib[0])+' look';
+    return '';
+  }
+  const r=[];
+  if((P.w.style[it.st]||0)>=1) r.push(cap(it.st));
+  if((P.w.brand[it.b]||0)>=1) r.push(it.b);
+  if(P.med && Math.abs(Math.log(it.pr/P.med))<0.4) r.push('your price range');
+  return r.length? 'Picked for you: '+r.join(' + ') : '';
+}
+// stable shuffle so a fresh deck mixes brands
+function seeded(n){let a=1;return ()=>((a=(a*16807)%2147483647)/2147483647);}
+const rnd=seeded(); const baseOrder=items.map(i=>i.id).sort(()=>rnd()-.5);
+let queue=[];
+function rebuild(){
+  const seen=new Set(state.seen);
+  const rest=baseOrder.filter(id=>!seen.has(id));
+  if(state.liked.length<2){queue=rest;return;}
+  const P=profile();
+  const ranked=rest.map(id=>({id,s:score(items[id],P)+Math.random()*0.6})).sort((a,b)=>b.s-a.s).map(x=>x.id);
+  // every 5th card is a wildcard so the deck keeps exploring
+  queue=[]; let wild=rest.filter(id=>!ranked.slice(0,40).includes(id)).sort(()=>Math.random()-.5);
+  queue=ranked;
+  if(state.seen.length%5===4 && wild.length) queue=[wild[0],...ranked.filter(x=>x!==wild[0])];
+}
+
+// ---------- cards ----------
+const deck=$('#deck');
+function cardHTML(it,P){
+  const why=reasons(it,P);
+  const chips=[it.s&&it.s!=='OS'?'Size '+it.s:(it.s==='OS'?'One size':''), it.cd? cap(it.cd.replace('used - ','')) :'', shortCat(it.c), it.st? cap(it.st):''].filter(Boolean);
+  return `<div class="ph"><b>${esc(it.b)}</b></div>
+  <img src="${esc(it.p)}" alt="${esc(it.t)}" referrerpolicy="no-referrer" draggable="false" onerror="this.remove()">
+  <div class="shade"></div>
+  <div class="pricetag">$${it.pr}${it.op>it.pr&&it.op<=it.pr*5&&![777,999,9999].includes(it.op)?`<s>$${it.op}</s>`:''}</div>
+  <div class="stamp like">LIKE</div><div class="stamp nope">PASS</div>
+  <div class="info">
+    <div class="brand">${esc(it.b)}</div>
+    <h2 class="title">${esc(it.t)}</h2>
+    <div class="chips">${chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}</div>
+    ${why?`<div class="why">${esc(why)}</div>`:''}
+  </div>`;
+}
+function render(){
+  deck.innerHTML='';
+  if(!queue.length){
+    deck.innerHTML=`<div class="empty"><h2>You've seen the whole rack</h2><p class="muted">All ${items.length} listings swiped. Check your style and liked items, or start over.</p><button class="linkbtn" id="resetBtn2">Start over</button></div>`;
+    $('#resetBtn2').onclick=reset; return;
+  }
+  const P=profile();
+  queue.slice(0,2).reverse().forEach((id,idx,arr)=>{
+    const el=document.createElement('div'); el.className='card'+(idx===0&&arr.length>1?' back':'');
+    el.innerHTML=cardHTML(items[id],P); el.dataset.id=id; deck.appendChild(el);
+  });
+  // preload the next few photos
+  queue.slice(2,6).forEach(id=>{const i=new Image(); i.referrerPolicy='no-referrer'; i.src=items[id].p;});
+  attachDrag(deck.lastElementChild);
+}
+function attachDrag(el){
+  let sx=0,sy=0,dx=0,dy=0,drag=false;
+  const like=el.querySelector('.stamp.like'), nope=el.querySelector('.stamp.nope');
+  el.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;sy=e.clientY;el.setPointerCapture(e.pointerId);el.style.transition='none';el.style.cursor='grabbing'});
+  el.addEventListener('pointermove',e=>{if(!drag)return;dx=e.clientX-sx;dy=e.clientY-sy;
+    el.style.transform=`translate(${dx}px,${dy*0.4}px) rotate(${dx/18}deg)`;
+    like.style.opacity=Math.max(0,Math.min(1,dx/90)); nope.style.opacity=Math.max(0,Math.min(1,-dx/90));});
+  const end=()=>{if(!drag)return;drag=false;el.style.cursor='';
+    if(Math.abs(dx)>100) fling(el,dx>0?'like':'pass');
+    else if(Math.abs(dx)<6&&Math.abs(dy)<6){el.style.transform='';}
+    else{el.style.transition='transform .25s';el.style.transform='';like.style.opacity=0;nope.style.opacity=0;}
+    dx=dy=0;};
+  el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
+}
+let busy=false;
+function fling(el,dir){
+  if(busy)return; busy=true;
+  const id=+el.dataset.id; const x=dir==='like'?1:-1;
+  el.querySelector(dir==='like'?'.stamp.like':'.stamp.nope').style.opacity=1;
+  el.style.transition='transform .32s ease-in';
+  el.style.transform=`translate(${x*window.innerWidth*1.1}px,-30px) rotate(${x*24}deg)`;
+  setTimeout(()=>{decide(id,dir);busy=false;},300);
+}
+function decide(id,dir){
+  state.seen.push(id); state.history.push({id,dir});
+  (dir==='like'?state.liked:state.passed).push(id);
+  save(); rebuild(); render(); updateCount();
+  const n=state.liked.length;
+  if(dir==='like'&&(n===3||n===8||n===15)){const t=topOf(profile().w.style)[0]; if(t) toast(`RACKD is learning: you're into ${cap(t[0])}. Reordering your rack.`);}
+}
+function topCard(){return deck.querySelector('.card:last-child');}
+$('#likeBtn').onclick=()=>{const c=topCard(); if(c) fling(c,'like')};
+$('#nopeBtn').onclick=()=>{const c=topCard(); if(c) fling(c,'pass')};
+$('#infoBtn').onclick=()=>{const c=topCard(); if(c) window.open(items[+c.dataset.id].u,'_blank','noopener')};
+$('#undoBtn').onclick=()=>{const h=state.history.pop(); if(!h){toast('Nothing to undo');return;}
+  state.seen=state.seen.filter(x=>x!==h.id); state.liked=state.liked.filter(x=>x!==h.id); state.passed=state.passed.filter(x=>x!==h.id);
+  save(); rebuild(); queue=[h.id,...queue.filter(x=>x!==h.id)]; render(); updateCount();};
+document.addEventListener('keydown',e=>{if(!$('#view-swipe').hidden){if(e.key==='ArrowRight')$('#likeBtn').click(); if(e.key==='ArrowLeft')$('#nopeBtn').click();}});
+
+// ---------- style + liked ----------
+const topOf=o=>Object.entries(o).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+function topLabels(v,g,n){return LABELS[g].map(([k,lv])=>[k,dot(v,lv)-labelBase[k]]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,n);}
+function styleView(){
+  const P=profile(); const n=state.liked.length; const box=$('#styleBox');
+  if(n<3){box.innerHTML=`<div class="panel"><h2>Like a few more pieces</h2><p class="muted">RACKD needs about 3 likes to read your style. You have ${n}. Swipe right on what you'd actually wear.</p></div>`;return;}
+  const bars=(arr,max)=>arr.slice(0,5).map(([k,v])=>`<div class="bar"><span>${esc(cap(k))}</span><div class="track"><div class="fill" style="width:${Math.round(v/max*100)}%"></div></div><span class="n">${Math.round(v)}</span></div>`).join('');
+  const st=topOf(P.w.style), br=topOf(P.w.brand), ct=topOf(P.w.cat);
+  const lo=P.prices[Math.floor(P.prices.length*.2)], hi=P.prices[Math.floor((P.prices.length-1)*.8)];
+  const passRate=Math.round(state.liked.length/Math.max(1,state.seen.length)*100);
+  const aiV=P.taste?topLabels(P.taste,'vibe',5):[], aiC=P.taste?topLabels(P.taste,'color',4):[];
+  const headline = aiV.length? aiV.slice(0,2).map(x=>cap(x[0])).join(' meets ') : st.slice(0,2).map(x=>cap(x[0])).join(' meets ');
+  const aiPanel = aiV.length? `<div class="panel"><h3>What FashionCLIP sees in your likes</h3>${bars(aiV.map(([k,v])=>[k,v*1000]),aiV[0][1]*1000).replace(/<span class="n">\d+<\/span>/g,'<span class="n"></span>')}
+    <p class="muted">Read from the photos themselves, not the listing titles.</p></div>
+    ${aiC.length?`<div class="panel"><h3>Colors you go for</h3><div class="chips">${aiC.map(([k])=>`<span class="pill">${esc(cap(k))}</span>`).join('')}</div></div>`:''}` : '';
+  box.innerHTML=`
+  <div class="panel"><h3>Your style</h3><h2>${esc(headline)||'Still learning'}${br[0]?`, mostly ${esc(br[0][0])}`:''}</h2>
+  <p class="muted">Based on ${n} likes out of ${state.seen.length} swipes (${passRate}% hit rate). Your rack is now sorted to show more of this first.</p></div>${aiPanel}
+  <div class="panel"><h3>Styles you like</h3>${bars(st,st[0]?st[0][1]:1)}</div>
+  <div class="panel"><h3>Brands you like</h3>${bars(br,br[0]?br[0][1]:1)}</div>
+  <div class="panel"><h3>What you go for</h3>${bars(ct,ct[0]?ct[0][1]:1)}</div>
+  <div class="panel"><h3>Your price sweet spot</h3><div class="big">$${lo}–$${hi}</div><p class="muted">Typical liked price $${P.med}. Listings near this get a boost.</p></div>
+  <button class="linkbtn" id="resetBtn">Reset and start a new demo</button>`;
+  $('#resetBtn').onclick=reset;
+}
+function likedView(){
+  const box=$('#likedBox'); const ids=[...state.liked].reverse();
+  if(!ids.length){box.innerHTML=`<div class="panel"><h2>No likes yet</h2><p class="muted">Swipe right or tap the heart and items land here, each with a link to buy it from the seller.</p></div>`;return;}
+  const total=ids.reduce((s,id)=>s+items[id].pr,0);
+  box.innerHTML=`<p class="muted" style="margin:0">${ids.length} saved · $${total} total</p><div class="grid">${ids.map(id=>{const it=items[id];return `<div class="item"><div class="thumb"><img src="${esc(it.p)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div>
+  <div class="body"><div class="t">${esc(it.t)}</div><div class="muted" style="font-size:12px">${esc(it.b)}${it.s?' · '+esc(it.s):''}</div><div class="p">$${it.pr}</div>
+  <a href="${esc(it.u)}" target="_blank" rel="noopener">View on ${esc(it.src||'seller site')}</a></div></div>`}).join('')}</div>`;
+}
+function updateCount(){$('#likedCount').textContent=state.liked.length;}
+function reset(){state={seen:[],liked:[],passed:[],history:[]};save();rebuild();show('swipe');render();updateCount();}
+function show(v){['swipe','style','liked'].forEach(k=>{$('#view-'+k).hidden=k!==v;$('#tab-'+k).setAttribute('aria-selected',k===v)});
+  if(v==='style')styleView(); if(v==='liked')likedView();}
+['swipe','style','liked'].forEach(k=>$('#tab-'+k).onclick=()=>show(k));
+let tt; function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600);}
+$('#engine').textContent=AI?'FashionCLIP':'';
+rebuild(); render(); updateCount();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "rackd",
+  "private": true,
+  "type": "module",
+  "description": "RACKD: swipe through secondhand listings, and the app learns your style.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "demo": "node 3-data/load-sample.js && node 5-app/build-app.js",
+    "fetch-new": "node 2-freshness/fetch-new.js",
+    "recheck": "node 2-freshness/recheck-sold.js",
+    "style-ai": "node 4-algorithm/fashionclip/fingerprint.js",
+    "build-app": "node 5-app/build-app.js",
+    "pipeline": "node 2-freshness/fetch-new.js && node 4-algorithm/fashionclip/fingerprint.js && node 5-app/build-app.js",
+    "check": "node toolbox/check.js"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "3.5.1"
+  }
+}

@@ -1,0 +1,14 @@
+# Secrets: never commit these
+.env
+.env.*
+!.env.example
+
+# Things that get downloaded or rebuilt on your laptop
+node_modules/
+toolbox/windows/node/
+4-algorithm/fashionclip/model-cache/
+logs/
+
+# Your real listings and the built app (they live on your laptop / database, not in GitHub)
+3-data/local/
+5-app/dist/

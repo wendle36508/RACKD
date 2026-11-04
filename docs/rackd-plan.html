@@ -1,0 +1,383 @@
+<title>Swipe Thrift Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column like a founder's field guide; sections marked with swing-tag labels; one interactive swipe demo */
+:root {
+  --bg: #f6f5f2;
+  --surface: #ffffff;
+  --ink: #1d2233;
+  --muted: #5b6072;
+  --line: #dddbe3;
+  --denim: #2f4a8a;
+  --denim-soft: #e5eaf6;
+  --tag: #c4542b;
+  --tag-soft: #f8e6dd;
+  --good: #2c7a4b;
+  --good-soft: #e1f1e7;
+  --warn: #9a6a00;
+  --warn-soft: #f8efd6;
+  --bad: #b23a3a;
+  --bad-soft: #f6e0e0;
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14161e; --surface: #1c1f2a; --ink: #e9e9ef; --muted: #a2a6b6; --line: #2f3342;
+    --denim: #8fa7e6; --denim-soft: #232c45; --tag: #ec8a62; --tag-soft: #3a2620;
+    --good: #6fcf97; --good-soft: #1b3326; --warn: #e8c063; --warn-soft: #362c14; --bad: #f08a8a; --bad-soft: #3a1f22;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14161e; --surface: #1c1f2a; --ink: #e9e9ef; --muted: #a2a6b6; --line: #2f3342;
+  --denim: #8fa7e6; --denim-soft: #232c45; --tag: #ec8a62; --tag-soft: #3a2620;
+  --good: #6fcf97; --good-soft: #1b3326; --warn: #e8c063; --warn-soft: #362c14; --bad: #f08a8a; --bad-soft: #3a1f22;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--body); font-size: 17px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 760px; margin: 0 auto; padding-block: 48px 80px; display: flex; flex-direction: column; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.5rem, 3.6vw, 2rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--denim); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--tag); outline-offset: 2px; }
+section { display: flex; flex-direction: column; gap: 18px; }
+.tag {
+  align-self: flex-start; font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--tag); background: var(--tag-soft); padding: 4px 10px 4px 18px; border-radius: 3px 12px 12px 3px; position: relative;
+}
+.tag::before { content: ""; position: absolute; left: 7px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: var(--bg); }
+.lede { font-size: 1.2rem; color: var(--muted); max-width: 62ch; }
+.prose { display: flex; flex-direction: column; gap: 14px; max-width: 65ch; }
+.muted { color: var(--muted); }
+ul.clean { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.callout { border-left: 4px solid var(--denim); background: var(--denim-soft); padding: 16px 18px; border-radius: 0 8px 8px 0; display: flex; flex-direction: column; gap: 8px; }
+.callout.orange { border-color: var(--tag); background: var(--tag-soft); }
+.callout strong { font-family: var(--display); }
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.summary div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.summary .k { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.summary .v { font-family: var(--display); font-weight: 700; font-size: 1.05rem; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 600px; font-size: 0.95rem; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+.pill { display: inline-block; font-family: var(--mono); font-size: 0.72rem; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.pill.good { color: var(--good); background: var(--good-soft); }
+.pill.warn { color: var(--warn); background: var(--warn-soft); }
+.pill.bad { color: var(--bad); background: var(--bad-soft); }
+.gloss { font-family: var(--mono); font-size: 0.85em; background: var(--denim-soft); color: var(--denim); padding: 1px 6px; border-radius: 4px; }
+
+/* swipe demo */
+.demo { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: start; }
+@media (max-width: 600px) { .demo { grid-template-columns: 1fr; } }
+.card { border-radius: 12px; border: 1px solid var(--line); overflow: hidden; background: var(--bg); transition: transform .25s ease, opacity .25s ease; }
+.card .img { aspect-ratio: 4 / 5; max-width: 100%; display: grid; place-items: center; font-size: 3.4rem; }
+.card .meta { padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.card .t { font-weight: 600; }
+.card .s { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.btns { display: flex; gap: 10px; margin-top: 12px; }
+.btns button { flex: 1; font: 600 0.95rem var(--body); padding: 10px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.btns .yes { background: var(--denim); color: var(--surface); border-color: var(--denim); }
+.bars { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.bar { display: grid; grid-template-columns: 110px 1fr 44px; gap: 10px; align-items: center; font-size: 0.9rem; }
+.bar .track { height: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--denim); width: 0; transition: width .35s ease; }
+.bar .n { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.demo-note { font-size: 0.88rem; color: var(--muted); }
+.reset { background: none; border: 0; padding: 0; color: var(--denim); font: inherit; font-size: 0.88rem; text-decoration: underline; cursor: pointer; align-self: flex-start; }
+
+/* roadmap */
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+.steps li { display: grid; grid-template-columns: 96px 1fr; gap: 16px; padding: 16px 0; border-top: 1px solid var(--line); }
+.steps li:last-child { border-bottom: 1px solid var(--line); }
+.steps .when { font-family: var(--mono); font-size: 0.8rem; color: var(--tag); padding-top: 3px; }
+.steps .what { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+@media (max-width: 520px) { .steps li { grid-template-columns: 1fr; gap: 4px; } }
+.stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.stack div { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--surface); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.stack .role { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.stack .tool { font-family: var(--display); font-weight: 700; }
+.stack p { font-size: 0.93rem; }
+footer { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; display: flex; flex-direction: column; gap: 6px; }
+@media (prefers-reduced-motion: reduce) { .card, .bar .fill { transition: none; } }
+</style>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:16px">
+  <span class="tag">Ignite · founder plan · Oct 2026</span>
+  <h1>Swipe to thrift: a plan for the app</h1>
+  <p class="lede">You want an endless deck of second-hand listings from Depop, Vinted and eBay. Swipe right on what you love, left on what you don't, and the app learns your style until every card feels picked for you. Here's how to build it legally, cheaply and without buying data.</p>
+</header>
+
+<section>
+  <span class="tag">The short version</span>
+  <div class="summary">
+    <div><span class="k">Getting listings</span><span class="v">Start with eBay only, using its official API. Ask Depop and Vinted for partnerships.</span></div>
+    <div><span class="k">Learning style</span><span class="v">An AI model that "reads" photos means the app is smart from swipe one.</span></div>
+    <div><span class="k">Buying data</span><span class="v">Skip it. A 60-second style quiz solves the cold start.</span></div>
+    <div><span class="k">Making money</span><span class="v">Referral commission on every sale, plus RACKD Plus: free users get 50 new swipes an hour, $5 a month gets 400.</span></div>
+  </div>
+</section>
+
+<section id="listings">
+  <span class="tag">1 · Where the listings come from</span>
+  <h2>Getting listings without getting sued</h2>
+  <div class="prose">
+    <p><strong>Scraping</strong> means a program visits a website like a robot and copies what's on the page. It's technically easy, and lots of people sell ready-made scrapers for Depop and Vinted. But for a startup that wants investors and a long life, it's the riskiest way to start.</p>
+    <p>An <span class="gloss">API</span> is the official "side door" a company opens so other apps can request its data in a tidy format, with permission. That's what you want.</p>
+  </div>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Platform</th><th>Official way in</th><th>Can you earn from it?</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><strong>eBay</strong></td><td>The <strong>Browse API</strong> is free with a developer account. It's built for exactly this: searching live listings with photos, prices and sizes.</td><td>Yes. The <strong>eBay Partner Network</strong> pays you a cut (roughly 1 to 4% depending on category) when someone you send buys.</td><td><span class="pill good">Start here</span></td></tr>
+        <tr><td><strong>Depop</strong></td><td>No public API for browsing listings. Their tools are for sellers managing their own shops. Their terms forbid scraping.</td><td>Only through a deal you negotiate with them.</td><td><span class="pill warn">Partner later</span></td></tr>
+        <tr><td><strong>Vinted</strong></td><td>No public API for browsing. Their "Pro" integrations are for business sellers. Their terms forbid scraping.</td><td>Only through a deal you negotiate with them.</td><td><span class="pill warn">Partner later</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>Why not just scrape Depop and Vinted?</h3>
+  <ul class="clean">
+    <li><strong>Breaking the rules you agreed to.</strong> Their terms of service ban automated collection. In the US, the hiQ v. LinkedIn case showed that even when scraping public pages isn't a crime, the company can still win on breach of contract.</li>
+    <li><strong>Personal data.</strong> Listings include seller usernames and photos of real people. In the UK and EU, that falls under data-protection law (GDPR), which needs a legal reason to collect it.</li>
+    <li><strong>Copyright.</strong> Sellers own their photos. Copying them onto your servers is different from linking to them.</li>
+    <li><strong>It breaks.</strong> Sites change their pages and block scrapers constantly, so your feed would go dark without warning.</li>
+    <li><strong>You'd burn the bridge.</strong> Depop and Vinted are your best future partners. Showing up as "the startup that scraped us" kills that conversation.</li>
+  </ul>
+  <div class="callout">
+    <strong>The pitch you'll eventually make to Depop and Vinted</strong>
+    <p>"We send you buyers who already love the item, because they swiped right on it. We only show your listings and link straight back to you." That's free, qualified traffic for them. Once you have a few hundred active users on eBay listings, you have the numbers to make that pitch.</p>
+  </div>
+</section>
+
+<section id="algorithm">
+  <span class="tag">2 · How the app learns your style</span>
+  <h2>Teaching the app your taste</h2>
+  <div class="prose">
+    <p>Here's the key idea. There are free, ready-made AI models (the best-known is called <span class="gloss">CLIP</span>) that can look at a photo and turn it into a list of a few hundred numbers. That list is called an <span class="gloss">embedding</span>. Think of it as a coordinate on a giant map of style, where photos that look alike land close together. A baggy 90s windbreaker lands near other 90s sportswear. A slip dress lands near other minimal, silky pieces.</p>
+    <p>So the app never needs to be told "this is grunge". It already sees which items look alike. Your taste then becomes a spot on that same map:</p>
+  </div>
+  <ul class="clean">
+    <li><strong>Swipe right:</strong> your spot moves a little toward that item.</li>
+    <li><strong>Swipe left:</strong> your spot moves a little away from it.</li>
+    <li><strong>Next card:</strong> the app mostly picks items close to your spot, plus about 1 in 5 that are a bit further away. This "exploring" stops your feed getting boring and lets it find tastes you didn't know you had.</li>
+  </ul>
+  <p class="muted">Try it below. The labels are only there so you can see what's happening; the real app works from the photos themselves.</p>
+
+  <div class="demo" aria-label="Swipe learning demo">
+    <div>
+      <div class="card" id="card">
+        <div class="img" id="cimg" aria-hidden="true"></div>
+        <div class="meta"><span class="t" id="ctitle"></span><span class="s" id="cmeta"></span></div>
+      </div>
+      <div class="btns">
+        <button id="no" type="button">Nope</button>
+        <button id="yes" class="yes" type="button">Love it</button>
+      </div>
+    </div>
+    <div class="bars">
+      <h3>What the app thinks you like</h3>
+      <div id="bars"></div>
+      <p class="demo-note" id="note">Swipe a few cards and watch your taste profile take shape.</p>
+      <button class="reset" id="reset" type="button">Start over</button>
+    </div>
+  </div>
+
+  <h3>Solving the "first day" problem</h3>
+  <div class="prose">
+    <p>A brand-new user has swiped nothing, so the app knows nothing. This is called the <span class="gloss">cold start</span>. Fix it with a 60-second onboarding quiz:</p>
+  </div>
+  <ul class="clean">
+    <li>Show 10 to 15 photos covering very different styles (Y2K, gorpcore, vintage workwear, minimal, streetwear, cottagecore and so on). The user taps the ones they like. That sets their starting spot on the map.</li>
+    <li>Ask the boring but vital stuff: sizes, budget, gender of clothing, which platforms they'll buy from, and country. Nothing kills a swipe app faster than loving an item that doesn't fit.</li>
+    <li>Optional later: "Paste a Pinterest board" or "upload 3 outfit photos" to set the starting spot instantly.</li>
+  </ul>
+  <div class="callout orange">
+    <strong>Later, once you have thousands of users</strong>
+    <p>You can add "people who liked what you liked also liked this", the trick Spotify and Netflix use. That's when your own swipe data becomes your biggest advantage, and nobody else has it.</p>
+  </div>
+</section>
+
+<section id="data">
+  <span class="tag">3 · Should you buy data?</span>
+  <h2>Short answer: no</h2>
+  <ul class="clean">
+    <li><strong>What you'd need doesn't exist for sale.</strong> The useful data is "this person liked these second-hand listings and disliked those". Nobody sells that. It's exactly what your app will create.</li>
+    <li><strong>The photo-reading AI already does the heavy lifting.</strong> CLIP-style models learned from hundreds of millions of images, for free. That's the "bought data", already paid for.</li>
+    <li><strong>Public fashion datasets</strong> (like DeepFashion) are mostly licensed for research only, not commercial apps. Read the licence before touching one.</li>
+    <li><strong>Buying personal data about people is legally risky</strong> in the UK and EU unless they clearly agreed to it being sold to you. It's also a bad look for investors.</li>
+    <li><strong>Better use of money:</strong> get your first 100 users. Post in thrift communities on TikTok, Reddit and Discord, or offer a small prize to beta testers who swipe 200 cards. Real users give you real data.</li>
+  </ul>
+</section>
+
+<section id="stack">
+  <span class="tag">4 · What to build it with</span>
+  <h2>A simple, cheap tech stack</h2>
+  <p class="prose muted">All of these have free tiers, so the first version should cost close to nothing a month. I can build this with you; you don't need to learn to code first.</p>
+  <div class="stack">
+    <div><span class="role">The app people use</span><span class="tool">Web app first (Next.js)</span><p>Opens on any phone browser and can be "added to home screen". Swipe gestures work fine. Move to a proper App Store app (React Native / Expo) once it's proven.</p></div>
+    <div><span class="role">Database and logins</span><span class="tool">Supabase</span><p>Stores users, swipes and listings, handles sign-up, and can search the style map directly (via a feature called pgvector).</p></div>
+    <div><span class="role">Listing collector</span><span class="tool">Small scheduled script</span><p>Every hour, asks the eBay API for fresh clothing listings, saves them, and drops ones that have sold.</p></div>
+    <div><span class="role">Style reader</span><span class="tool">Open-source CLIP model</span><p>Turns each listing photo into its style coordinates once, when it arrives. Hosted AI services can run it for fractions of a penny per image.</p></div>
+    <div><span class="role">Hosting</span><span class="tool">Vercel</span><p>Puts the app on the internet with one click and scales up if you go viral.</p></div>
+    <div><span class="role">Money</span><span class="tool">eBay Partner Network links</span><p>Every "Buy" button is a tracked link, so a purchase pays you commission automatically.</p></div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <span class="tag">5 · Roadmap</span>
+  <h2>From idea to Ignite demo</h2>
+  <ol class="steps">
+    <li><span class="when">Week 1</span><div class="what"><h3>Check the problem is real</h3><p>Talk to 15 to 20 thrifters. Ask how long they scroll, how often they give up, what they'd pay. Sign up for an eBay developer account and the eBay Partner Network (approval can take a few days).</p></div></li>
+    <li><span class="when">Weeks 2–4</span><div class="what"><h3>Build the prototype</h3><p>eBay listings only, one category (say tops and jackets), one country. Style quiz, swipe deck, a "liked" list with Buy buttons. That's the whole app.</p></div></li>
+    <li><span class="when">Weeks 5–8</span><div class="what"><h3>Private beta with 50–100 users</h3><p>Track three numbers: what share of swipes are right swipes, and does it rise as people keep swiping (proof the app learns); how many tap Buy; how many come back next week.</p></div></li>
+    <li><span class="when">Month 3</span><div class="what"><h3>Ignite pitch</h3><p>Show the "right-swipe rate climbs from swipe 1 to swipe 100" chart. That one graph proves the core idea better than any slide.</p></div></li>
+    <li><span class="when">Month 3+</span><div class="what"><h3>Approach Depop and Vinted</h3><p>Bring your user numbers and click-through stats. Ask for a data feed or partner API in exchange for the buyers you send.</p></div></li>
+  </ol>
+</section>
+
+<section id="money">
+  <span class="tag">6 · Business model</span>
+  <h2>How it makes money</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Stream</th><th>How it works</th><th>When</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Referral commission</strong></td><td>You earn a percentage of each sale your users make through your links (eBay Partner Network now, partner deals later).</td><td><span class="pill good">Day one</span></td></tr>
+        <tr><td><strong>Swipe subscription ($5/mo)</strong></td><td>The Tinder playbook. Free users get <strong>50 new swipes per hour</strong>. Paying <strong>$5 a month</strong> raises that to <strong>400 new swipes per hour</strong>. Extras like price-drop alerts or rewinding a swipe can be added to the paid tier later.</td><td><span class="pill warn">After launch</span></td></tr>
+        <tr><td><strong>Seller boosts</strong></td><td>Sellers pay to put a listing in front of users whose style matches it. Very targeted, so worth more than normal ads.</td><td><span class="pill warn">Once you have scale</span></td></tr>
+        <tr><td><strong>Trend insights</strong></td><td>Anonymous, combined reports on which styles are rising, sold to brands or resellers. Never individual user data.</td><td><span class="pill bad">Much later</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <strong>A realistic money note</strong>
+    <p>Commission on second-hand clothes is small per sale (a 3% cut of a $30 jacket is about 90 cents). It proves the model and covers early costs. The bigger money is usually the subscription and seller boosts once you have an engaged audience.</p>
+  </div>
+
+  <h3>Pricing tiers (decided 3 Nov 2026)</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Tier</th><th>Price</th><th>New swipes per hour</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Free</strong></td><td>$0</td><td>50</td></tr>
+        <tr><td><strong>Paid</strong></td><td>$5 / month</td><td>400</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>What the listings cost to collect (Apify)</h3>
+  <p class="prose muted">Rough estimates at about $1.80 per 1,000 listings, the price seen for the Depop scraper. Not yet checked against Apify's live pricing. "Re-check" means looking at saved listings again to drop ones that have sold.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Plan</th><th>What it collects</th><th>New listings / hr (all sites)</th><th>Cost / month</th><th>$5 subscribers to cover it</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Demo</strong></td><td>Depop only: 20 new an hour + 500 re-checks a day</td><td>20</td><td>about $55</td><td>13</td></tr>
+        <tr><td><strong>Launch</strong></td><td>4 sites, each 20 new an hour + 500 re-checks a day</td><td>80</td><td>about $210</td><td>47</td></tr>
+        <tr><td><strong>Bigger</strong></td><td>4 sites, each 50 new an hour + 1,000 re-checks a day</td><td>200</td><td>about $475</td><td>105</td></tr>
+        <tr><td><strong>Full paid tier</strong></td><td>4 sites, each 100 new an hour + 1,000 re-checks a day</td><td>400</td><td>about $735</td><td>162</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted" style="font-size:0.9rem">Subscriber counts assume each $5 brings in about $4.55 after card fees (Stripe charges 2.9% + 30 cents). If people pay through the Apple or Google app store, you keep about $4.25, so you need roughly 7% more subscribers. Hosting and the style AI cost extra on top.</p>
+
+  <div class="callout orange">
+    <strong>Honest mentor note: swipes are not the same as listings scraped</strong>
+    <p>Every scrape is shared by all users, so 1,000 users don't cost 1,000 times more. But a paid user who really swipes 400 new cards in an hour needs at least 400 fresh listings arriving every hour. The Launch plan only brings in about 80, and even the Bigger plan brings in about 200. Delivering the full 400 needs the "Full paid tier" row, about $735 a month, which roughly 160 subscribers would cover.</p>
+    <p>Two things soften this. "New" can mean "new to you", so older listings a user hasn't seen yet still count. And 400 an hour is one swipe every 9 seconds for a full hour, so most people won't hit it. Start on Launch, and only scale the scraper when paying users actually run out of cards.</p>
+  </div>
+</section>
+
+<section id="risks">
+  <span class="tag">7 · Watch out for</span>
+  <h2>Things that can trip you up</h2>
+  <ul class="clean">
+    <li><strong>Read the eBay API rules.</strong> They cover how you show listings, how long you can keep data, and that you link back to eBay. Following them keeps your access.</li>
+    <li><strong>Sold items.</strong> Second-hand listings are one-offs. Refresh often so people don't fall for something that's already gone.</li>
+    <li><strong>Privacy policy from day one.</strong> You're storing what people like. Say what you collect and why, and let them delete it.</li>
+    <li><strong>Depending on one platform.</strong> eBay could change its rules. That's another reason to start partner conversations early.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>This is a starting plan, not legal advice. Before launch, have someone check the eBay API licence and your privacy policy against the rules in your country.</p>
+  <p>Commission ranges are approximate and vary by country and category; check the current eBay Partner Network rate card when you sign up.</p>
+</footer>
+</div>
+
+<script>
+(function () {
+  var styles = ["Y2K", "Vintage workwear", "Gorpcore", "Minimal", "Streetwear", "Cottagecore"];
+  var items = [
+    { e: "🧥", t: "Carhartt chore jacket", p: "£38 · eBay", w: { "Vintage workwear": 1, "Streetwear": 0.3 } },
+    { e: "👚", t: "Butterfly baby tee", p: "£12 · Depop", w: { "Y2K": 1, "Streetwear": 0.2 } },
+    { e: "🧥", t: "Arc'teryx shell, 2014", p: "£85 · Vinted", w: { "Gorpcore": 1, "Streetwear": 0.3 } },
+    { e: "👗", t: "Black silk slip dress", p: "£22 · Vinted", w: { "Minimal": 1, "Y2K": 0.3 } },
+    { e: "👖", t: "Double-knee work pants", p: "£30 · eBay", w: { "Vintage workwear": 1, "Gorpcore": 0.2 } },
+    { e: "👗", t: "Floral prairie dress", p: "£18 · Depop", w: { "Cottagecore": 1 } },
+    { e: "👟", t: "Nike Air Max 95", p: "£60 · eBay", w: { "Streetwear": 1, "Y2K": 0.3 } },
+    { e: "🧶", t: "Cream fisherman knit", p: "£26 · Vinted", w: { "Cottagecore": 0.6, "Minimal": 0.6 } },
+    { e: "🎒", t: "Patagonia fleece vest", p: "£34 · eBay", w: { "Gorpcore": 1, "Vintage workwear": 0.2 } },
+    { e: "👜", t: "Rhinestone baguette bag", p: "£15 · Depop", w: { "Y2K": 1 } }
+  ];
+  var score, i, swipes;
+  var bars = document.getElementById("bars");
+  function reset() {
+    score = {}; styles.forEach(function (s) { score[s] = 0; });
+    i = 0; swipes = 0; render(); show();
+    document.getElementById("note").textContent = "Swipe a few cards and watch your taste profile take shape.";
+  }
+  function render() {
+    var max = 0; styles.forEach(function (s) { max = Math.max(max, score[s]); });
+    bars.innerHTML = "";
+    styles.forEach(function (s) {
+      var pct = max > 0 ? Math.max(0, score[s]) / max * 100 : 0;
+      var row = document.createElement("div"); row.className = "bar";
+      row.innerHTML = '<span></span><div class="track"><div class="fill"></div></div><span class="n"></span>';
+      row.children[0].textContent = s;
+      row.children[2].textContent = Math.round(pct) + "%";
+      bars.appendChild(row);
+      requestAnimationFrame(function () { row.querySelector(".fill").style.width = pct + "%"; });
+    });
+  }
+  function show() {
+    var it = items[i % items.length];
+    document.getElementById("cimg").textContent = it.e;
+    document.getElementById("ctitle").textContent = it.t;
+    document.getElementById("cmeta").textContent = it.p;
+  }
+  function swipe(like) {
+    var it = items[i % items.length];
+    Object.keys(it.w).forEach(function (s) { score[s] += (like ? 1 : -0.5) * it.w[s]; });
+    i++; swipes++;
+    var card = document.getElementById("card");
+    card.style.transform = "translateX(" + (like ? 40 : -40) + "px) rotate(" + (like ? 6 : -6) + "deg)";
+    card.style.opacity = "0.2";
+    setTimeout(function () { card.style.transform = ""; card.style.opacity = ""; show(); }, 220);
+    render();
+    var top = styles.slice().sort(function (a, b) { return score[b] - score[a]; })[0];
+    document.getElementById("note").textContent = swipes < 3
+      ? "Keep going. A couple more swipes and a pattern appears."
+      : "After " + swipes + " swipes the app leans toward " + top + ", so it would now show mostly " + top + " pieces, plus a few wildcards.";
+  }
+  document.getElementById("yes").addEventListener("click", function () { swipe(true); });
+  document.getElementById("no").addEventListener("click", function () { swipe(false); });
+  document.getElementById("reset").addEventListener("click", reset);
+  reset();
+})();
+</script>
