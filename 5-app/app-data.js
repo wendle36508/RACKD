@@ -22,8 +22,14 @@ export function vecFor(listings, fp) {
 const safe = v => JSON.stringify(v).replace(/</g, '\\u003c');   // stops a listing title from breaking the page
 const TEMPLATE = path.join(ROOT, '5-app', 'app-template.html');
 
-export function renderApp({ listings, fp, live = null, foot }) {
+// title/head/top/bottom are optional extra HTML (the public demo site adds its hero, FAQ and
+// footer around the app); the real app leaves them empty.
+export function renderApp({ listings, fp, live = null, foot, title = 'RACKD', head = '', top = '', bottom = '' }) {
   return fs.readFileSync(TEMPLATE, 'utf8')
+    .replace('__TITLE__', () => String(title).replace(/</g, '&lt;'))
+    .replace('__HEAD__', () => head)
+    .replace('__TOP__', () => top)
+    .replace('__BOTTOM__', () => bottom)
     .replace('__DATA__', () => safe(listings.map(toCard)))
     .replace('__VEC__', () => safe(vecFor(listings, fp)))
     .replace('__LIVE__', () => safe(live))

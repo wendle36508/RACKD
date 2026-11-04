@@ -1,12 +1,16 @@
 // Floor 6: a demo version of RACKD to put online before real listings flow.
 // It uses made-up placeholder items (no real listings, no Poshmark data, no scraping, costs
-// nothing) and builds one page: 6-hosting/demo/dist/index.html. That page is what gets
-// deployed to Vercel so Tanner has a link to open on his phone.
+// nothing) and builds the demo site in 6-hosting/demo/dist/: the deck with a hero, FAQ and
+// founder footer around it (words in site.config.js), plus /about and /changelog. That folder
+// is what gets deployed to Vercel.
 //   node 6-hosting/demo/build-demo.js
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, logger } from '../../toolbox/env.js';
 import { renderApp } from '../../5-app/app-data.js';
+import { alert } from '../../toolbox/alerts.js';
+import { SITE } from './site.config.js';
+import { TITLE, headTags, heroHTML, bottomHTML, aboutPage, changelogPage, robotsTxt, sitemapXml } from './site.js';
 
 const log = logger('demo');
 
@@ -62,12 +66,24 @@ const listings = ITEMS.map(([title, brand, category, style, size, price, orig, c
   id: `manual:demo-${i + 1}`, source: 'manual', sourceId: `demo-${i + 1}`,
   url: `https://www.depop.com/search/?q=${encodeURIComponent(q)}`, affiliateUrl: null,
   title, brand, price, originalPrice: orig, currency: 'USD', size, category, condition: 'used - good', style,
-  photoUrl: photo(colour, shape, 'Demo item'), photoUrls: [], sellerRating: null, sellerReviewCount: null,
+  photoUrl: photo(colour, shape, 'Example find'), photoUrls: [], sellerRating: null, sellerReviewCount: null,
   status: 'active', missedChecks: 0, scrapedFor: null, firstSeenAt: now, lastCheckedAt: now, soldAt: null,
 }));
 
-const foot = 'DEMO: made-up placeholder items, so you can try the swiping. Real Depop, Vinted and eBay finds are coming soon.';
-const out = path.join(ROOT, '6-hosting', 'demo', 'dist', 'index.html');
-fs.mkdirSync(path.dirname(out), { recursive: true });
-fs.writeFileSync(out, renderApp({ listings, fp: { items: {} }, foot }));
-log(`Built ${out}: ${listings.length} placeholder items.`);
+const foot = 'DEMO: example finds, so you can try the swiping. Real Depop, Vinted and eBay thrift finds are coming soon - the treasure hunt without opening three apps.';
+const dist = path.join(ROOT, '6-hosting', 'demo', 'dist');
+const write = (rel, text) => { const f = path.join(dist, rel); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, text); };
+fs.rmSync(dist, { recursive: true, force: true });
+write('index.html', renderApp({ listings, fp: { items: {} }, foot, title: TITLE, head: headTags(), top: heroHTML(), bottom: bottomHTML() }));
+write(path.join('about', 'index.html'), aboutPage());
+write(path.join('changelog', 'index.html'), changelogPage());
+write('robots.txt', robotsTxt());
+write('sitemap.xml', sitemapXml());
+// Pictures that sit next to the page: the link-preview image, and Tanner's photo once added.
+for (const f of ['og.png', SITE.founder.photo].filter(Boolean)) {
+  const src = path.join(ROOT, '6-hosting', 'demo', f);
+  if (fs.existsSync(src)) fs.copyFileSync(src, path.join(dist, f));
+  else await alert(`Demo site: ${f} is missing`, `6-hosting/demo/${f} was not found, so the site links to a picture that isn't there.`);
+}
+if (!SITE.waitlistFormUrl) await alert('Demo site: sign-up list is not switched on', 'The "Get the 3-day free trial first" form is not collecting emails yet. Set WAITLIST_FORM_URL in Vercel (see 6-hosting/demo/site.config.js).');
+log(`Built ${dist}: ${listings.length} example items, plus /about, /changelog, robots.txt and sitemap.xml.`);
