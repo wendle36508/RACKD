@@ -24,7 +24,7 @@ set "PATH=%~dp0toolbox\windows\node;%PATH%"
 :menu
 echo.
 echo  ===== RACKD =====
-echo  1  Set up (first time only: installs the style AI add-on, about 200 MB)
+echo  1  Set up (first time only: makes your .env file and installs the style AI add-on, about 200 MB)
 echo  2  Start the app (opens http://localhost:3000; close this window to stop it)
 echo  3  Add 3 example listings (to try the app before Apify is plugged in)
 echo  4  Run the style AI on new listings
@@ -37,6 +37,7 @@ echo.
 set "c="
 set /p c=Pick a number: 
 if "%c%"=="1" call "%NPM%" install --no-audit --no-fund --loglevel=error
+if "%c%"=="1" if not exist ".env" (copy ".env.example" ".env" >nul & echo Made your .env file in this folder. Open it with Notepad to add your keys.)
 if "%c%"=="2" start "" "http://localhost:3000" & "%NODE%" 5-app\server.js
 if "%c%"=="3" "%NODE%" 3-data\load-sample.js
 if "%c%"=="4" "%NODE%" 4-algorithm\fashionclip\fingerprint.js
