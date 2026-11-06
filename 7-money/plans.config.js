@@ -1,8 +1,10 @@
 // RACKD is members-only (Tanner, 4 Nov 2026): there is no free version.
 // Every member gets the same plan. Change the numbers here and everything else follows.
 export const MEMBER_PLAN = {
-  refreshesPerDay: 2,
-  perRefresh: 150,          // 2 x 150 = up to 300 new listings a day per member
+  // Tanner, 6 Nov 2026: 200 new listings every 30 minutes while the app is open.
+  // 32 refreshes = 16 hours of non-stop use, so up to 6,400 a day per member (a safety ceiling).
+  refreshesPerDay: 32,
+  perRefresh: 200,
   priceUsdPerMonth: 9.99,   // Tanner, 4 Nov 2026. Set the same price on the Stripe product
 };
 

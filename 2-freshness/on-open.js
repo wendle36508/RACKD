@@ -1,8 +1,9 @@
 // Floor 2: "refresh on open".
-// Each time a user opens the app, RACKD scrapes new listings picked for THEIR style, unless:
-//   - it already scraped for them less than an hour ago (cooldown), or
+// Each time a user opens the app (and every 30 minutes while it stays open), RACKD scrapes
+// new listings picked for THEIR style, unless:
+//   - it already scraped for them less than 30 minutes ago (cooldown), or
 //   - they aren't a member (RACKD is members-only: no subscription, no scraping), or
-//   - they've had all of today's refreshes (2 a day, 150 listings each), or
+//   - they've had all of today's refreshes (200 listings each, see 7-money/plans.config.js), or
 //   - this month's Apify budget is used up (spend guard).
 // While the scrape runs (it takes a minute or two), the app shows their stored matches.
 import { logger } from '../toolbox/env.js';
