@@ -345,7 +345,9 @@ rebuild(); render(); updateCount();
 
 // ---------- live mode: refresh on open ----------
 // Tells the server the app was opened (it scrapes new listings for this user's style,
-// at most once an hour), then checks every few seconds for new cards while it works.
+// at most every 30 minutes), then checks every few seconds for new cards while it works.
+// While the app stays open on screen, it asks again when the next refresh is due.
+// (This timer lives only in the open app: close the app and nothing runs.)
 function addCards(cards){
   const known=new Set(items.map(i=>i.k)); let n=0, nf=0;
   cards.forEach(d=>{ if(known.has(d.k)) return; const id=items.length; items.push({...d,id}); baseOrder.push(id); n++;
@@ -371,9 +373,15 @@ async function poll(){
   if(r){ addCards(r.cards||[]); liveLoading=!!r.running; }
   if(liveLoading) setTimeout(poll,4000); else if(!queue.length) render();
 }
-if(LIVE){
-  api('/api/open').then(r=>{ openInfo=r; liveRefreshing=!!(r&&r.scraping); liveLoading=true; if(!queue.length) render(); setTimeout(poll,3000); });
+let nextT;
+function openLive(){
+  clearTimeout(nextT);
+  api('/api/open').then(r=>{ openInfo=r; liveRefreshing=!!(r&&r.scraping); liveLoading=true; if(!queue.length) render(); setTimeout(poll,3000);
+    const at=r&&r.next&&r.next.at; if(at) nextT=setTimeout(()=>{ if(document.visibilityState==='visible') openLive(); }, Math.max(5000,new Date(at)-Date.now()+2000)); });
 }
+// Coming back to the app counts as opening it again (the server still enforces the 30 minutes).
+addEventListener('visibilitychange',()=>{ if(LIVE && document.visibilityState==='visible' && openInfo && !liveLoading) openLive(); });
+if(LIVE) openLive();
 </script>
 </body>
 </html>

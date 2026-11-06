@@ -8,7 +8,7 @@ Tanner (founder) is non-technical. Explain changes in plain language and keep st
 - Secrets go in `.env` only (never committed). Never print the Apify token.
 - No Poshmark data in this repo (Tanner's decision).
 - Scraping with Apify is Tanner's decision; don't argue it. Proxy stays Apify Residential.
-- Scraping is per user, on app open (2-freshness/on-open.js): max once an hour, 2 refreshes a day, sizes per plan in 7-money/plans.config.js. Every Apify call must go through `runPaid` (spend guard). No timers or cron jobs.
+- Scraping is per user, on app open (2-freshness/on-open.js), and again every 30 minutes while the app stays open (Tanner, 6 Nov 2026): 200 per refresh, up to 32 a day, set in 7-money/plans.config.js and 2-freshness/freshness.config.js. Every Apify call must go through `runPaid` (spend guard). No server timers or cron jobs (the only timer is in the open app, and it stops when the app closes).
 - RACKD is members-only ($9.99/month, one plan in `7-money/plans.config.js`): no free version, and non-members get no scraping. `TEST_MODE_EVERYONE_IS_MEMBER` is for laptop testing only and must be off before launch.
 - Never show a user the same card twice: every card on screen is saved in `user.shown` and `deckFor` leaves it out. A refresh's own finds (`user.lastRefresh.ids`) go to the front of the deck.
 - Log anything that fires with `activity()` and anything Tanner must know with `alert()` (toolbox/alerts.js). Tanner wants nothing to happen, or fail to happen, silently.

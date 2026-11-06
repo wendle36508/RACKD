@@ -9,7 +9,7 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
 | Floor | Folder | What it does | Status today |
 |---|---|---|---|
 | 1. Listing sources | [`1-sources/`](1-sources/) | Scrapes Vinted, Depop and eBay through Apify, with Apify's Residential proxy | Ready for your Apify token and scrapers |
-| 2. Freshness | [`2-freshness/`](2-freshness/) | Refresh on open: new listings for each user's style, at most once an hour, 2 times a day. Checks for sold items just before showing | Built, waiting for the scrapers |
+| 2. Freshness | [`2-freshness/`](2-freshness/) | Refresh on open: new listings for each user's style, every 30 minutes while the app is open, 200 each. Checks for sold items just before showing | Built, waiting for the scrapers |
 | 3. Data storage | [`3-data/`](3-data/) | Listings, users and spending, all in one standard shape. Files on your laptop now, a cloud database later | Local storage works; cloud database not built |
 | 4. Algorithm | [`4-algorithm/`](4-algorithm/) | Reads each user's style from their swipes, builds their searches, ranks their deck, decides what can be shared. FashionCLIP reads the photos | Built, waiting for real listings |
 | 5. App | [`5-app/`](5-app/) | The swipe app and the small server behind it | Built (try it with example listings) |
@@ -34,8 +34,9 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
         v
  [2 FRESHNESS] 1. Sold check: their next cards that haven't been checked in 24 hours
         |         are looked at again. Sold ones are hidden for good.
-        |      2. Refresh: if their last refresh was over an hour ago, and they still
-        |         have one left today (2 a day), a new scrape starts.
+        |      2. Refresh: if their last refresh was over 30 minutes ago, and they
+        |         have one left today (up to 32), a new scrape starts. While the app
+        |         stays open, it asks again every 30 minutes.
         v
  [4 ALGORITHM] Builds that user's search from their likes: favorite brands, styles,
         |      size and price range. (New users get starter searches until 3 likes.)
@@ -43,14 +44,14 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
  [7 MONEY]     Spend guard: is there room in this month's $330 budget? If not, skip.
         v
  [1 SOURCES]   Apify scrapes Vinted 50%, Depop 30%, eBay 20%, through the Residential
-        |      proxy. 150 listings per refresh.
+        |      proxy. 200 listings per refresh.
         v
  [3 DATA]      New listings saved, tagged with whose search found them.
         v
  [5 APP]       The new finds jump to the FRONT of their deck within a minute or two.
 ```
 
-**Never the same card twice:** the moment a card is on someone's screen, RACKD remembers it, and it never comes back, whether they swiped it or not. So when someone opens the app with a refresh, nothing they see is a repeat. While the refresh loads, they only get listings they've never seen (or a "finding fresh pieces for you" screen), and the new finds go straight to the front as soon as they land. Each refresh also searches a different slice of their style, so fewer repeats come back from the sites in the first place. If they run out, the app says when their next refresh is ("at 3:40 PM" or "tomorrow"). The 2-a-day limit resets at midnight US Eastern time.
+**Never the same card twice:** the moment a card is on someone's screen, RACKD remembers it, and it never comes back, whether they swiped it or not. So when someone opens the app with a refresh, nothing they see is a repeat. While the refresh loads, they only get listings they've never seen (or a "finding fresh pieces for you" screen), and the new finds go straight to the front as soon as they land. Each refresh also searches a different slice of their style, so fewer repeats come back from the sites in the first place. If they run out, the app says when their next refresh is ("at 3:40 PM" or "tomorrow"). The daily limit resets at midnight US Eastern time.
 
 **Light sharing:** a listing found for one user can show up for someone else only if the algorithm rates it a strong match for *their* style, and at most 20% of anyone's deck comes from other people's searches. Brand-new users don't get shared listings until RACKD knows their style.
 
@@ -60,10 +61,10 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
 
 | Rule | Now | File |
 |---|---|---|
-| Refreshes per user per day | 2 | `7-money/plans.config.js` |
-| Listings per refresh | 150 (so up to 300 a day) | `7-money/plans.config.js` |
+| Refreshes per user per day | up to 32 (16 hours of non-stop use) | `7-money/plans.config.js` |
+| Listings per refresh | 200 (so up to 6,400 a day) | `7-money/plans.config.js` |
 | Membership price | $9.99 a month (no free version) | `7-money/plans.config.js` and your Stripe product |
-| Minimum gap between refreshes | 60 minutes | `2-freshness/freshness.config.js` |
+| Minimum gap between refreshes | 30 minutes | `2-freshness/freshness.config.js` |
 | Re-check before showing if older than | 24 hours | `2-freshness/freshness.config.js` |
 | Site split | Vinted 50%, Depop 30%, eBay 20% | `1-sources/sources.config.js` |
 | Monthly Apify budget | $330 | `.env` (MONTHLY_BUDGET_USD) |
@@ -75,15 +76,15 @@ Apify prices: **Vinted $1, Depop $4 and eBay $4 per 1,000 listings.** With your 
 
 | Per user, if they use every refresh | Listings a month | Cost a month |
 |---|---|---|
-| Member (300 a day) | 9,000 | $22.50 |
+| Member (6,400 a day) | 192,000 | $480 |
 
 Sold-item checks cost the same per listing and come on top (they only happen for cards that haven't been checked in 24 hours). Residential proxy data may also be billed on top. Put it in `.env` as `PROXY_USD_PER_1000` once you know it. **The spend guard counts all of it and stops scraping when the month's $330 is used.** Users still see their stored matches.
 
-With $330 a month, that's roughly 14 members who max out every day. Most people won't open the app twice every day, and shared listings cut the cost, so the real number is higher.
+**Heads up (6 Nov 2026):** at 200 every 30 minutes, Apify is too expensive for heavy users: one member using the app 16 hours a day would use the whole $330 budget in about 3 weeks. The spend guard stops it there. This plan is meant to run on RACKD's own scraper (pay-per-GB proxy), which should cost a few dollars per member a month. That still needs a one-day test. Most people won't open the app twice every day, and shared listings cut the cost, so the real number is higher.
 
-**Watch this:** a member pays $9.99, which is about $9.40 after Stripe's fee. A member who uses every refresh costs about $22.50 in scraping. So RACKD makes money on members who use less than about 42% of their refreshes, and loses money on the heaviest users. The daily summary and `logs/spend.log` show how it's going.
+**Watch this:** a member pays $9.99, which is about $9.40 after Stripe's fee. A member who uses every refresh costs about $480 in scraping on Apify. Most people won't, and RACKD's own scraper should bring this down a lot. The daily summary and `logs/spend.log` show how it's going.
 
-**3-day free trial:** people put in a card to start. Trial users get the full member limits, and Stripe charges $9.99 automatically when the 3 days end. Cancel before then and they're never charged. (A maxed-out trial costs you about $2.25 in scraping.)
+**3-day free trial:** people put in a card to start. Trial users get the full member limits, and Stripe charges $9.99 automatically when the 3 days end. Cancel before then and they're never charged. (On Apify, a maxed-out trial costs about $48 in scraping.)
 
 **Test mode (only for you, on your laptop, before Stripe exists):** it's off. Set `TEST_MODE_EVERYONE_IS_MEMBER=true` in `.env` to try the app yourself, and **set it back to blank afterwards.** While it's on, the health check shows Floor 7 amber. When Stripe is set up, put your payment link in `.env` as `STRIPE_CHECKOUT_URL` and the "Become a member" button goes there. Check `logs/spend.log` or open `http://localhost:3000/api/status` to see this month's spend.
 
