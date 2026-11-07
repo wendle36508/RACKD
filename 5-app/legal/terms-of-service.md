@@ -4,7 +4,7 @@
 **Last updated:** November 7, 2026
 **Version:** 2026-11-07
 
-These Terms of Service ("Terms") are an agreement between you and **Tanner Wendle**, 51 Dwight St, Dedham, MA 02026 ("RACKD", "we", "us"), covering your use of the RACKD app at rackd-app.fly.dev and any RACKD app or website that links here (together, "RACKD").
+These Terms of Service ("Terms") are an agreement between you and **Tanner Wendle**, 51 Dwight St, Dedham, MA 02026 ("RACKD", "we", "us"), covering your use of the RACKD app at swiperackd.com and any RACKD app or website that links here (together, "RACKD").
 
 By signing in to or using RACKD, you agree to these Terms and confirm you have read our **Privacy Policy**, which explains how we handle your information. If you do not agree, do not use RACKD.
 
