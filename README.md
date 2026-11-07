@@ -16,6 +16,7 @@ This repo is the whole build in one place. It is organized like the **RACKD buil
 | 6. Hosting | [`6-hosting/`](6-hosting/) | Putting the app online (Vercel) | Not built |
 | 7. Money | [`7-money/`](7-money/) | Membership ($9.99 a month, members only), the $330/month spend guard, Stripe and affiliate placeholders | Spend guard and members-only built; Stripe and affiliate are placeholders |
 | Toolbox | [`toolbox/`](toolbox/) | Safety rails (activity log, alerts, daily summary, health check), Windows scripts, self-test | Ready |
+| Brand intel (Idea A) | [`brand-intel/`](brand-intel/) | A separate product beside the app: tracks 5-10 hero products per brand and reports what they resell for (% of retail) and how fast they sell. Python, reuses floor 1's scrapers and floor 7's spend guard | First version built; tested on a made-up Vuori market; real run waits for the Apify token |
 | Docs | [`docs/`](docs/) | The RACKD plan and build tower diagram | |
 
 ## How it works when someone opens the app

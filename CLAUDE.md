@@ -3,6 +3,7 @@
 Tanner (founder) is non-technical. Explain changes in plain language and keep steps short.
 
 - The repo is organized by build-tower floor: 1-sources, 2-freshness, 3-data, 4-algorithm, 5-app, 6-hosting, 7-money, toolbox. Keep new work in the right floor.
+- `brand-intel/` is Idea A (resale product intelligence for brands), a separate Python product beside the tower. It gets listings only through `brand-intel/bridge/rackd-sources.mjs` (floor 1's `search` / `checkListings`, so `runPaid` and the spend guard still apply) and keeps its own SQLite data in `brand-intel/data/` (not `3-data/store.js`, since it stores prices over time, not swipe cards). Python only for new code there. Test with `py brand-intel/run.py selftest`.
 - Floors talk only through small seams: sources expose `search` / `checkListings`; all storage goes through `3-data/store.js`; all buy links go through `7-money/affiliate.js`. Don't bypass them.
 - Every listing must match `3-data/listing.schema.json`. Keep listing facts only (no seller usernames or ids).
 - Secrets go in `.env` only (never committed). Never print the Apify token.

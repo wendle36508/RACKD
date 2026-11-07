@@ -1,0 +1,5 @@
+# Optional photo check (FashionCLIP). About 1 GB with the model.
+torch
+transformers>=4.40
+pillow
+requests

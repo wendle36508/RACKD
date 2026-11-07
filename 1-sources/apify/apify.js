@@ -31,6 +31,7 @@ async function runActor(actorId, input, timeoutSecs) {
  */
 export async function runPaid(source, actorId, input, maxItems, what, { timeoutSecs = 240 } = {}) {
   const price = usdPerListing(source);
+  need('APIFY_TOKEN');               // no token: stop here, before anything is counted as spent
   allow(maxItems * price, what);
   let items;
   try { items = await runActor(actorId, input, timeoutSecs); }
