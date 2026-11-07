@@ -23,12 +23,13 @@ Tanner's rule: use people's **style data** freely, never their **account info**.
 3. **Watch the 50% rule.** California's law applies to any company, however small, that gets half or more of its revenue from selling or sharing personal info. Selling de-identified insights doesn't count, but per-person data would.
 4. **eBay listing data.** The insights may also use eBay listings. eBay's API terms limit how listing data can be reused or sold, so check them before selling anything built on eBay listings. (This is about listings, not users.)
 
-## Details filled in (all placeholders done)
+## Details to fill in
 
 
 | Item | Note |
 |---|---|
-| Operator, address, email, dates | Filled in 7 Nov 2026 (Tanner). Switch to the company name and a virtual mailbox once the company exists |
+| Operator, email, dates | Filled in 7 Nov 2026 (Tanner). Switch to the company name once the company exists |
+| `[MAILING ADDRESS]` | Tanner's virtual mailbox address (Tanner chose a virtual address, not home, 7 Nov) |
 | 30 days | The policy promises Neon backups and Fly logs are gone within 30 days. Check both dashboards are set to 30 days or less |
 | Section 3.1 table | Add a row for any new service that touches user data |
 
