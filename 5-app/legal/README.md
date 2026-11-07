@@ -3,6 +3,7 @@
 | File | What it is | Status |
 |---|---|---|
 | `privacy-policy.md` | The RACKD Privacy Policy for the live app (rackd-app.fly.dev: Google sign-in, Neon database, Fly.io hosting) | Written 7 Nov 2026. Fill in the placeholders and have a lawyer check it before strangers sign up |
+| `terms-of-service.md` | RACKD Terms of Service (app page /terms, also needed for Google sign-in branding). 18+, free, RACKD is not the seller, affiliate links, style-data license matching the policy, $50 liability cap, Massachusetts law | Written 7 Nov 2026. Needs a lawyer check. Update it when payments start |
 
 The text is Markdown, so the Flet app can show it as-is with `ft.Markdown`. The thread that owns the app adds the in-app page and links.
 
@@ -42,7 +43,7 @@ Put the public link to this policy in Google Cloud > **Google Auth Platform > Br
 1. Is our de-identification good enough for the brand insights we plan to sell, and what should the brand contract say?
 2. Minimum age: is 18+ right? (Recommended, because we plan to sell insights.)
 3. Do any affiliate links count as "sharing" under California law?
-4. We still need **Terms of Service** (account rules, "purchases happen on the seller's site", affiliate disclosure, and billing once payments start).
+4. Terms of Service (written 7 Nov): is the $50 liability cap, the style-data license and Massachusetts courts (no arbitration clause) right for us?
 
 ## Keep the policy true
 
