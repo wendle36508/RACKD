@@ -13,3 +13,11 @@ logs/
 3-data/local/
 5-app/dist/
 6-hosting/demo/dist/
+
+# Brand intel: your tracked data, reports, reference photos and the photo AI model stay on your laptop
+brand-intel/data/
+brand-intel/output/
+brand-intel/model-cache/
+brand-intel/brands/*/photos/*.jpg
+brand-intel/brands/*/photos/*.png
+__pycache__/
