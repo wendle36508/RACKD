@@ -1,10 +1,10 @@
 # RACKD Privacy Policy
 
-**Effective date:** [EFFECTIVE DATE]
-**Last updated:** [LAST UPDATED DATE]
+**Effective date:** November 7, 2026
+**Last updated:** November 7, 2026
 **Version:** 2026-11-07
 
-RACKD is run by **[OPERATOR NAME]** ("RACKD", "we", "us"), located at **[MAILING ADDRESS]**. Questions about privacy: **[PRIVACY EMAIL]**.
+RACKD is run by **Tanner Wendle** ("RACKD", "we", "us"), located at **51 Dwight St, Dedham, MA 02026**. Questions about privacy: **wendle36508@gmail.com**.
 
 This policy explains what information the RACKD app (at rackd-app.fly.dev and any RACKD app or website that links here, together "RACKD") collects, how we use it, who we share it with, and the choices you have. RACKD is offered in the United States.
 
@@ -145,7 +145,7 @@ RACKD shows listings from other platforms and links to them. We do not control t
 ## 6. Your choices and rights
 
 - **Delete your account:** in the app, go to **[SETTINGS > DELETE ACCOUNT]**. This is permanent.
-- **See or correct your information:** you can change your department, sizes and style answers in the app. To get a copy of what we hold about you, email **[PRIVACY EMAIL]**.
+- **See or correct your information:** you can change your department, sizes and style answers in the app. To get a copy of what we hold about you, email **wendle36508@gmail.com**.
 - **Opt out of sale, sharing and targeted ads:** today we do not sell or share personal information that identifies you, and we do not use it for targeted advertising. If that ever changes, we will update this policy first and give you a clear **"Do Not Sell or Share My Personal Information"** choice in the app, and we will treat a Global Privacy Control signal from your browser as an opt-out.
 - **Marketing emails:** opt in or out at any time.
 - **Stop using Google sign-in:** you can also remove RACKD's access from your Google Account settings at myaccount.google.com/permissions. This stops new sign-ins but does not delete your RACKD data; use Delete account for that.
@@ -154,7 +154,7 @@ RACKD shows listings from other platforms and links to them. We do not control t
 
 Depending on where you live (for example California, Colorado, Connecticut, Virginia, Texas, Oregon and other states with privacy laws), you may have the right to know what personal information we collect and how we use it, to get a copy, to correct it, to delete it, and to opt out of its sale, of "sharing" for targeted advertising, and of profiling that has legal or similarly significant effects (RACKD does not use your data for decisions like that; it only picks which listings to show you). You may also appeal if we turn down a request.
 
-To use any of these rights, email **[PRIVACY EMAIL]** or use the in-app tools above. We will confirm your identity by checking you control the Google account on file. You can use an authorized agent. We will not treat you differently for using your rights.
+To use any of these rights, email **wendle36508@gmail.com** or use the in-app tools above. We will confirm your identity by checking you control the Google account on file. You can use an authorized agent. We will not treat you differently for using your rights.
 
 **California.** In the last 12 months we collected these categories of personal information: identifiers (email address, Google account ID, IP address); internet or other electronic activity (swipes, likes, taps, cards shown); commercial information (shopping preferences such as brands, sizes and budget); and inferences (your style profile). We collect them for the purposes in section 2, from you, your device and Google. We disclose them to the service providers in section 3.1. We have not sold or shared (for targeted advertising) personal information, and we have no actual knowledge of selling or sharing that of anyone under 16. Information that has been de-identified as described in section 2.2 is not personal information under California law. We keep each category as described in section 5.
 
@@ -168,7 +168,7 @@ We use reasonable safeguards: encrypted connections (HTTPS), sign-in through Goo
 
 ## 8. Age limit
 
-RACKD is for people **18 and older**. We do not knowingly collect information from anyone under 18. If you believe someone under 18 has an account, email **[PRIVACY EMAIL]** and we will delete it.
+RACKD is for people **18 and older**. We do not knowingly collect information from anyone under 18. If you believe someone under 18 has an account, email **wendle36508@gmail.com** and we will delete it.
 
 ---
 
@@ -180,6 +180,6 @@ We may update this policy as RACKD changes. We will change the "Last updated" da
 
 ## 10. Contact us
 
-**[OPERATOR NAME]**
-**[MAILING ADDRESS]**
-**[PRIVACY EMAIL]**
+**Tanner Wendle**
+**51 Dwight St, Dedham, MA 02026**
+**wendle36508@gmail.com**

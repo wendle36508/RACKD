@@ -29,10 +29,7 @@ Search `privacy-policy.md` for `[`.
 
 | Placeholder | What goes there |
 |---|---|
-| `[OPERATOR NAME]` | Your name until a company is formed, then the company's legal name |
-| `[MAILING ADDRESS]` | A real address (a virtual mailbox is fine) |
-| `[PRIVACY EMAIL]` | An inbox you actually check |
-| `[EFFECTIVE DATE]`, `[LAST UPDATED DATE]` | The day it goes live |
+| Operator, address, email, dates | Filled in 7 Nov 2026 (Tanner). Switch to the company name and a virtual mailbox once the company exists |
 | `[SETTINGS > DELETE ACCOUNT]` | Where the delete button really is in the app |
 | `[30] days` | How long Neon backups and Fly logs keep data. Check both dashboards |
 | `[CHECK: ...]` | Lines to keep or delete once confirmed (name or photo from Google, analytics, affiliate links) |
