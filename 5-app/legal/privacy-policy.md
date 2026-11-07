@@ -4,7 +4,7 @@
 **Last updated:** November 7, 2026
 **Version:** 2026-11-07
 
-RACKD is run by **Tanner Wendle** ("RACKD", "we", "us"), located at **[MAILING ADDRESS]**. Questions about privacy: **wendle36508@gmail.com**.
+RACKD is run by **Tanner Wendle** ("RACKD", "we", "us"), located at **51 Dwight St, Dedham, MA 02026**. Questions about privacy: **wendle36508@gmail.com**.
 
 This policy explains what information the RACKD app (at rackd-app.fly.dev and any RACKD app or website that links here, together "RACKD") collects, how we use it, who we share it with, and the choices you have. RACKD is offered in the United States.
 
@@ -183,5 +183,5 @@ We may update this policy as RACKD changes. We will change the "Last updated" da
 ## 10. Contact us
 
 **Tanner Wendle**
-**[MAILING ADDRESS]**
+**51 Dwight St, Dedham, MA 02026**
 **wendle36508@gmail.com**

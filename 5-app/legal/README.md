@@ -29,7 +29,7 @@ Tanner's rule: use people's **style data** freely, never their **account info**.
 | Item | Note |
 |---|---|
 | Operator, email, dates | Filled in 7 Nov 2026 (Tanner). Switch to the company name once the company exists |
-| `[MAILING ADDRESS]` | Tanner's virtual mailbox address (Tanner chose a virtual address, not home, 7 Nov) |
+| Address | Tanner's home address for now (Tanner's choice, 7 Nov). A virtual mailbox can replace it later |
 | 30 days | The policy promises Neon backups and Fly logs are gone within 30 days. Check both dashboards are set to 30 days or less |
 | Section 3.1 table | Add a row for any new service that touches user data |
 
