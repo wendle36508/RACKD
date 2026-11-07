@@ -23,17 +23,14 @@ Tanner's rule: use people's **style data** freely, never their **account info**.
 3. **Watch the 50% rule.** California's law applies to any company, however small, that gets half or more of its revenue from selling or sharing personal info. Selling de-identified insights doesn't count, but per-person data would.
 4. **eBay listing data.** The insights may also use eBay listings. eBay's API terms limit how listing data can be reused or sold, so check them before selling anything built on eBay listings. (This is about listings, not users.)
 
-## Placeholders to fill in
+## Details filled in (all placeholders done)
 
-Search `privacy-policy.md` for `[`.
 
-| Placeholder | What goes there |
+| Item | Note |
 |---|---|
 | Operator, address, email, dates | Filled in 7 Nov 2026 (Tanner). Switch to the company name and a virtual mailbox once the company exists |
-| `[SETTINGS > DELETE ACCOUNT]` | Where the delete button really is in the app |
-| `[30] days` | How long Neon backups and Fly logs keep data. Check both dashboards |
-| `[CHECK: ...]` | Lines to keep or delete once confirmed (name or photo from Google, analytics, affiliate links) |
-| `[ANY OTHER PROVIDER]` | Any new service that touches user data. Delete the row if none |
+| 30 days | The policy promises Neon backups and Fly logs are gone within 30 days. Check both dashboards are set to 30 days or less |
+| Section 3.1 table | Add a row for any new service that touches user data |
 
 ## Must-do for Google sign-in
 
@@ -50,7 +47,7 @@ Put the public link to this policy in Google Cloud > **Google Auth Platform > Br
 
 Update the policy (and its date and version) before any of these change:
 
-- What the app stores about a user (today: Google ID, email, department, sizes, swipes, likes, cards shown, Shop it / See listing taps, quiz picks, style words; soon budget and brands).
+- What the app stores about a user (today: Google ID, email, join time, department, size, style words and their FashionCLIP vector, quiz picks, budget band, favorite brands, swipe/pick/tap events with timestamps and visit ID, anonymous visits; browser keeps only a signed user-ID pass; Google name/photo not stored).
 - Adding payments, analytics, ads, email marketing or a new provider.
 - Selling or sharing anything that is **not** de-identified (needs the opt-out button first).
 - Showing anything about resale sellers or buyers (we keep item facts only).

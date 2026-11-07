@@ -32,20 +32,23 @@ When you sign in with Google, Google tells us:
 - your **Google account ID** (a number Google uses to identify your account), and
 - your **email address**.
 
-We do not receive or store your Google password, and we ask Google only for the basic sign-in information listed here. [CHECK: if the app also stores your name or profile photo from Google, add them here.]
+We do not receive or store your Google password. Google also passes us your name and profile photo while you sign in, but we do not save them anywhere.
 
 ### 1.2 Style data
 
 "Style data" means information about your taste and shopping preferences, and what you do in RACKD. It includes:
 
-- **Your setup choices:** department (for example men's or women's), sizes, your style quiz picks and any style words you type in, and, when we add them, your budget range and preferred brands.
+- **Your setup choices:** department (for example men's or women's), size, your style quiz picks, any style words you type in, your budget range and your favorite brands, plus the date you joined.
 - **Your swipes:** which listings you swiped right (like) or left (pass), and the cards you were shown.
 - **Your taps:** when you tap **Shop it** or **See listing**, and on which listing.
-- **What we work out from it:** a style profile, meaning a summary of what you seem to like, built by our software (including an AI model that compares listing photos) from the information above. It also includes the dates and times of your activity.
+- **Your visits:** when you open RACKD, with a visit ID that ties together what you do in one visit. Before you sign in, a visit is anonymous; once you sign in, it is linked to your account.
+- **What we work out from it:** a style profile, meaning a summary of what you seem to like, built by our software from the information above. This includes a "style fingerprint" made from your style words by an AI model that compares words with listing photos. We also keep the date and time of each swipe, tap and visit.
 
 ### 1.3 Technical information
 
-Like almost every website, our hosting provider records basic technical information when your device connects, such as your **IP address**, browser and device type, and the time of the request. We use small pieces of browser storage to keep you signed in. We do not use advertising cookies or third-party ad trackers. [CHECK: update this if analytics or ad tools are ever added.]
+Like almost every website, our hosting provider records basic technical information when your device connects, such as your **IP address**, browser and device type, and the time of the request. To keep you signed in, your browser stores a signed "remember me" pass that contains only your RACKD user number and an expiry date (not your email). We do not use advertising cookies, analytics tools or third-party ad trackers.
+
+Listing photos load directly from the resale platform (such as eBay) and are not copied to our servers, so that platform may see your IP address when a photo loads.
 
 ### 1.4 What we do **not** collect
 
@@ -78,7 +81,7 @@ We use style data broadly, including to:
 3. **Research:** study fashion, style and resale trends, such as which brands, items and price points people want.
 4. **Create insights for others:** build **de-identified or aggregated** (combined across many members) reports, datasets, scores and models from style data, and **share, license or sell** them to brands, retailers, resale platforms, researchers and other business partners, for example to help a clothing brand understand demand for its past products. We may also use these insights in other RACKD products and services.
 
-When we share style data outside RACKD, other than with our service providers (section 3.1), we first remove your name, email address and Google account ID and take reasonable steps so it cannot reasonably be linked back to you. We do not try to re-identify de-identified data, and we require anyone who receives it not to try either. [LAWYER: see legal/README.md, question 1, before any user-level style data is shared.]
+When we share style data outside RACKD, other than with our service providers (section 3.1), we first remove your email address and Google account ID and take reasonable steps so it cannot reasonably be linked back to you. We do not try to re-identify de-identified data, and we require anyone who receives it not to try either.
 
 Because these insights do not identify you, they may be kept and used after you delete your account (see section 5).
 
@@ -103,7 +106,6 @@ Companies that run parts of RACKD for us, under agreements that limit how they c
 | Google | Sign in with Google | Your Google sign-in |
 | Fly.io | Hosts the RACKD app | Technical information, and all app data passing through the server |
 | Neon | Hosts our database | Account details and style data |
-| [ANY OTHER PROVIDER] | [ROLE] | [DATA] |
 
 ### 3.2 De-identified and aggregated insights
 
@@ -111,7 +113,7 @@ As described in section 2.2, we may share or sell insights built from style data
 
 ### 3.3 Resale platforms, when you tap through
 
-When you tap **Shop it** or **See listing**, you leave RACKD and go to the resale platform's own site (such as eBay). That site will see your visit and may use its own cookies, under its own privacy policy. Some of these links may be affiliate links, which means RACKD may earn a commission if you buy, at no extra cost to you. [CHECK: keep this sentence only if affiliate links are live.]
+When you tap **Shop it** or **See listing**, you leave RACKD and go to the resale platform's own site (such as eBay). That site will see your visit and may use its own cookies, under its own privacy policy. Some of these links may be affiliate links, now or in the future, which means RACKD may earn a commission if you buy, at no extra cost to you.
 
 ### 3.4 Legal reasons and safety
 
@@ -136,15 +138,15 @@ RACKD shows listings from other platforms and links to them. We do not control t
 ## 5. How long we keep information
 
 - **While you have an account:** we keep your account details and style data so your feed keeps working.
-- **When you delete your account:** we erase your account and your activity (swipes, likes, taps and quiz answers) from our database straight away. Copies in our database provider's backups are overwritten within **[30] days**.
+- **When you delete your account:** we erase your account, your activity (swipes, likes, taps and quiz answers) and your visit records from our database straight away. Copies in our database provider's backups are overwritten within **30 days**.
 - **What stays:** de-identified or aggregated insights already created from style data (section 2.2), because they do not identify you and cannot be traced back to your account. We may also keep a minimal record if the law requires it or to resolve a dispute.
-- **Technical logs** are kept for a short time, usually no more than **[30] days**, unless needed to investigate a problem.
+- **Technical logs** are kept for a short time, usually no more than **30 days**, unless needed to investigate a problem.
 
 ---
 
 ## 6. Your choices and rights
 
-- **Delete your account:** in the app, go to **[SETTINGS > DELETE ACCOUNT]**. This is permanent.
+- **Delete your account:** in the app, tap **...** at the top right (next to your size), choose **Delete my account**, then confirm **Delete everything**. This is permanent.
 - **See or correct your information:** you can change your department, sizes and style answers in the app. To get a copy of what we hold about you, email **wendle36508@gmail.com**.
 - **Opt out of sale, sharing and targeted ads:** today we do not sell or share personal information that identifies you, and we do not use it for targeted advertising. If that ever changes, we will update this policy first and give you a clear **"Do Not Sell or Share My Personal Information"** choice in the app, and we will treat a Global Privacy Control signal from your browser as an opt-out.
 - **Marketing emails:** opt in or out at any time.
@@ -156,7 +158,7 @@ Depending on where you live (for example California, Colorado, Connecticut, Virg
 
 To use any of these rights, email **wendle36508@gmail.com** or use the in-app tools above. We will confirm your identity by checking you control the Google account on file. You can use an authorized agent. We will not treat you differently for using your rights.
 
-**California.** In the last 12 months we collected these categories of personal information: identifiers (email address, Google account ID, IP address); internet or other electronic activity (swipes, likes, taps, cards shown); commercial information (shopping preferences such as brands, sizes and budget); and inferences (your style profile). We collect them for the purposes in section 2, from you, your device and Google. We disclose them to the service providers in section 3.1. We have not sold or shared (for targeted advertising) personal information, and we have no actual knowledge of selling or sharing that of anyone under 16. Information that has been de-identified as described in section 2.2 is not personal information under California law. We keep each category as described in section 5.
+**California.** In the last 12 months we collected these categories of personal information: identifiers (email address, Google account ID, IP address, visit ID); internet or other electronic activity (swipes, likes, taps, cards shown, visits); commercial information (shopping preferences such as brands, sizes and budget); and inferences (your style profile). We collect them for the purposes in section 2, from you, your device and Google. We disclose them to the service providers in section 3.1. We have not sold or shared (for targeted advertising) personal information, and we have no actual knowledge of selling or sharing that of anyone under 16. Information that has been de-identified as described in section 2.2 is not personal information under California law. We keep each category as described in section 5.
 
 ---
 
